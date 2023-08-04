@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block style %}
+<style>
+    body {
+        background-image: url("/static/background.jpg");
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+    <form action="/register" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="name" name="name" placeholder="Name" type="text" required>
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text" required>
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="email" name="email" placeholder="Email (use your ashesi email)" type="text" required>
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto small-input" id="image" name="image" type="file" required>
+            <label for="image" id="uploadLabel" class="btn btn-secondary" style="width: 275px; color: gray; background-color: white;">Profile Picture</label>
+            <script>
+                // If you want to handle the selected file and display its name, you can use this JavaScript code.
+                const fileInput = document.getElementById('image');
+                const uploadLabel = document.getElementById('uploadLabel');
+              
+                fileInput.addEventListener('change', () => {
+                  const files = fileInput.files;
+                  if (files.length > 0) {
+                    uploadLabel.textContent = 'Image Uploaded';
+                  } else {
+                    uploadLabel.textContent = 'Upload Image';
+                  }
+                });
+            </script>
+        </div>
+        <div class="mb-3">
+            <select class="form-select mx-auto w-auto" name="status" required>
+                <option disabled selected>Status</option>
+                {% for status in statuses %}
+                    <option value="{{status}}">{{status}}</option>   
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Next</button>
+    </form>
+{% endblock %}

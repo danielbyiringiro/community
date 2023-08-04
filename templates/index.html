@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <form id="postForm" class="flex-container">
+        <a href="/users/{{username}}">
+            <img src="{{image}}" alt="pic" class="horizontal-image">
+        </a>
+        <input type="text" placeholder="   Create a post" class="inputbar" onclick="openPostEditor()">
+    </form>
+</div>
+{% for post in posts %}
+    <div class="post-container">
+        <div class="post-header">
+            <img src="{{post['profilePicturePath']}}" class="horizontal-image" alt="Profile Picture">
+            <span class="post-username">
+                <p class="username">{{post['fullname']}}</p>
+                <p class="belowtext">{{post['class']}} CS |  {{post['time']}}</p>
+            </span>
+        </div>
+        <br>
+        <div class="post-content" id="postContent">
+            {{post['postContent']}}
+        </div>
+        {% if post['picturePath'] %}
+            <div class="post-image-container">
+                <img class="post-image" src="{{post['picturePath']}}" alt="Post Image">
+            </div>
+        {% endif %}
+        <div class="post-actions">
+            <button class="like-button">
+                <span>
+                    <img src="/static/like.png" alt="like">
+                    <p id="likebutton">Like</p>
+                </span>
+            </button>
+            <button class="comment-button">
+                <img src="/static/comment.png" alt="comment">
+                Comment
+            </button>
+            <br>
+            <span id="like-count">{{post['likes']}} Likes</span>
+            <span id="comment-count">3 Comments</span>
+        </div>
+    </div>
+{% endfor %}
+<script>
+    function openPostEditor()
+    {
+        const url = "/newpost";
+        window.location.href = url;
+    }
+</script>
+{% endblock %}

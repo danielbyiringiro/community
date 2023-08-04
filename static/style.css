@@ -1,0 +1,268 @@
+/* Size for brand */
+nav .navbar-brand
+{
+    font-size: xx-large;
+}
+
+/* Colors for brand */
+nav .navbar-brand .blue
+{
+    color: #537fbe;
+}
+nav .navbar-brand .red
+{
+    color: #ea433b;
+}
+nav .navbar-brand .yellow
+{
+    color: #f5b82e;
+}
+nav .navbar-brand .green
+{
+    color: #2e944b;
+}
+
+footer {
+    text-align: center;
+    background-color: #537fbe;
+    padding: 15px;
+    font-size: large;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+
+footer a {
+    color: initial;
+}
+
+.small-input {
+    max-width: 275px;
+}
+
+.smaller-input {
+    max-width: 100px;
+}
+
+.search-input {
+    gap: 3rem;
+    border-radius: 9px;
+    padding: 0.1rem 1.5rem;
+    background-color: #F0F0F0;
+    height: 40px;
+}
+
+.search-form {
+    gap: 3rem;
+    border-radius: 9px;
+    padding: 0.1rem 1.5rem;
+}
+
+.search-icon {
+    background-image: url("https://img.icons8.com/ios-filled/50/000000/search.png");
+    background-size: 20px;
+    background-position: 5px center;
+    background-repeat: no-repeat;
+    padding-left: 30px; /* Adjust this value based on the icon size */
+}
+
+
+.begin {
+    margin-left: 50px;
+    font-weight: bold;
+    font-size: clamp(1rem, 2rem, 2.25rem);
+}
+
+.end {
+    margin-right: 50px;
+    font-weight: bold;
+}
+
+.navbar {
+    padding: 0.1rem 6%;
+    background-color: #FFFFFF;
+    margin-bottom: 0;
+    position: fixed;
+    width: 100%;
+}
+
+.navtypo {
+    font-weight: bold;
+    text-align: center;
+    font-size: 20px;
+}
+
+.nav-end
+{
+    height: 30px;
+    align-items: center;
+    justify-items: center;
+}
+
+.container 
+{
+    max-width: 600px;
+    text-align: center;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 35px;
+    display: inline-block;
+}
+
+.inputbar
+{
+    border-radius: 10px;
+    width: 100%;
+    height: 45px;
+    background-color: #F0F0F0;
+    cursor: pointer;
+    caret-color: transparent;
+}
+
+.horizontal-image {
+    width: 50px; /* Adjust the width of the image as needed */
+    height: 50px; /* Adjust the height of the image as needed */
+    margin-right: 10px; /* Add some spacing between the image and the input */
+    border-radius: 50%;
+}
+
+.flex-container {
+    display: flex; /* Set the container as a flex container */
+    align-items: center; /* Align items vertically in the center */
+}
+
+#mytextarea {
+    width: 100%; /* Textarea will take the whole available width */
+    border: none;
+    resize: none;
+    outline: none;
+    position: relative;
+  }
+
+#mytextarea :focus {
+    outline: none;
+}
+
+.fullname {
+    text-decoration: none;
+    color: black;
+    font-size: large;
+    font-weight: bold;
+    font-family: sans-serif;
+}
+
+input[type="file"] {
+    display: none;
+    }
+    /* Optional: Add some hover and active effects for better user experience */
+label#uploadLabel:hover {
+    background-color: #2980b9;
+    }
+
+label#uploadLabel:active {
+    background-color: #1f618d;
+    }
+
+.post-container {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    max-width: 600px;
+    margin: 10px auto;
+    padding: 10px;
+}
+.post-header {
+    display: flex;
+}
+.post-username {
+    font-weight: bold;
+}
+.post-content {
+    word-wrap: break-word;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: left;
+    margin-top: -20px;
+}
+.post-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+.post-image {
+    max-width: 100%;
+}
+.post-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+.post-actions button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #4b4f56;
+}
+.post-actions button img {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+.like-button {
+    color: #007bff;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.like-count{
+    margin-right: 20px;
+}
+.like-button span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.like-button.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.comment-button {
+    color: #007bff;
+}
+.post-actions button:hover {
+    color: #0056b3;
+}
+
+.see-more-button {
+    display: block;
+    color: #007bff;
+    cursor: pointer;
+}
+
+.belowtext {
+    font-weight: 400;
+    color: gray;
+    margin-top: -13px;
+    text-align: left;
+}
+.post-actions span {
+    margin-right: 10px; /* Adjust the margin value as per your preference */
+}
+.username {
+    text-align: left;
+}  
+
+#likebutton {
+    margin-top: 18px;
+    margin-left: 8px;
+}
+
+.main {
+    background-color: #F0F0F0;
+}

@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    New Post
+{% endblock %}
+
+{% block main %}
+<div class="post container">
+    <form action="/newpost" method="post" enctype="multipart/form-data">
+        <a href="/users/{{username}}" class="fullname">
+            <img src="{{image}}" alt="pic" class="horizontal-image">
+            {{fullname}}
+        </a>
+        <br><br>
+        <textarea id="mytextarea" autofocus placeholder="What do you want to post ?" type="text" name="postContent" rows="10" cols="50" required></textarea>
+        <input autocomplete="off" class="form-control mx-auto w-auto smaller-input" value="Upload Image" id="image" name="image" type="file">
+        <label for="image" id="uploadLabel" class="btn btn-secondary">Upload Image</label>
+        <button class="btn btn-primary" type="submit">Post</button>
+    </form>
+</div>
+<script>
+    // If you want to handle the selected file and display its name, you can use this JavaScript code.
+    const fileInput = document.getElementById('image');
+    const uploadLabel = document.getElementById('uploadLabel');
+  
+    fileInput.addEventListener('change', () => {
+      const files = fileInput.files;
+      if (files.length > 0) {
+        uploadLabel.textContent = 'Image Uploaded';
+      } else {
+        uploadLabel.textContent = 'Upload Image';
+      }
+    });
+</script>
+{% endblock %}

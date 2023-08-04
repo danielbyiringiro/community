@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Student
+{% endblock %}
+
+{% block style %}
+<style>
+    body {
+        background-image: url("/static/background.jpg");
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+    <form action="/year" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="code" name="code" placeholder="Code" type="text" required>
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password" required>
+        </div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="confirm" name="confirm" placeholder="Password (Again)" type="password" required>
+            <input type="hidden" value="{{id}}" name="id">
+        </div>
+        <div class="mb-3">
+            <select name="class" class="form-control mx-auto w-auto">
+                <option disabled selected>Class Group</option>
+                {% for year in years %}
+                    <option value="{{year}}" class="form-control mx-auto w-auto">{{year}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Register</button>
+    </form>
+{% endblock %}
