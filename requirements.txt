@@ -1,0 +1,5 @@
+flask
+flask_session
+cs50
+flask_mail
+python-dotenv
