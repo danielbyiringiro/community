@@ -13,6 +13,7 @@
 {% endblock %}
 
 {% block main %}
+<div class="year">
     <form action="/year" method="post">
         <div class="mb-3">
             <input autocomplete="off" class="form-control mx-auto w-auto" id="code" name="code" placeholder="Code" type="text" required>
@@ -25,6 +26,14 @@
             <input type="hidden" value="{{id}}" name="id">
         </div>
         <div class="mb-3">
+            <select name="major" class="form-control mx-auto w-auto">
+                <option disabled selected>Major</option>
+                {% for major in majors %}
+                    <option value="{{major}}" class="form-control mx-auto w-auto">{{major}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
             <select name="class" class="form-control mx-auto w-auto">
                 <option disabled selected>Class Group</option>
                 {% for year in years %}
@@ -34,4 +43,5 @@
         </div>
         <button class="btn btn-primary" type="submit">Register</button>
     </form>
+</div>
 {% endblock %}

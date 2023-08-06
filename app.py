@@ -5,7 +5,7 @@ from flask_session import Session
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from helper import login_required, registration_required
+from helper import *
 from dotenv import load_dotenv
 
 
@@ -67,6 +67,7 @@ def index():
             picturepath = post['picturePath'] if not None else None
             likes = post['likes']
             created_at = post['created_at']
+            created_at = time_format(created_at)
             userId = post['userId']
             yeargroup = db.execute("SELECT yearorposition FROM user WHERE id = ? ", userId)[0]['yearorposition']
             yeargroup = str(yeargroup)[2:]
@@ -74,6 +75,8 @@ def index():
 
             post_details = {'class': yeargroup, 'fullname' : fullname, 'postContent': post_content, 'username': post_username, 'profilePicturePath': userPicturePath, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'class': yeargroup}
             posts.append(post_details)
+        
+        posts.reverse()
 
         return render_template("index.html", username = username, image = picture_path, posts = posts)
     
@@ -112,7 +115,9 @@ def login():
         return redirect("/")
     
     else:
-        return render_template("login.html")
+        years = list(range(2002,2028))
+        majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
+        return render_template("year.html", years=years, majors=majors)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -222,7 +227,8 @@ def year():
     if request.method == "GET":
 
         years = list(range(2002,2028))
-        return render_template("year.html", id = session["registration_id"], years = years)
+        majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
+        return render_template("year.html", id = session["registration_id"], years = years, majors = majors)
     
     if request.method == "POST":
 

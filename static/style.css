@@ -37,7 +37,7 @@ footer a {
 }
 
 .small-input {
-    max-width: 275px;
+    width: 275px;
 }
 
 .smaller-input {
@@ -171,6 +171,7 @@ label#uploadLabel:active {
     margin: 10px auto;
     padding: 10px;
 }
+
 .post-header {
     display: flex;
 }
@@ -263,6 +264,7 @@ label#uploadLabel:active {
     margin-left: 8px;
 }
 
-.main {
-    background-color: #F0F0F0;
+.year, .register {
+    margin-top: 50px;
 }
+
