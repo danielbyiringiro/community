@@ -115,9 +115,8 @@ def login():
         return redirect("/")
     
     else:
-        years = list(range(2002,2028))
-        majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
-        return render_template("year.html", years=years, majors=majors)
+
+        return render_template("login.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
