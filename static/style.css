@@ -213,31 +213,27 @@ label#uploadLabel:active {
     height: 20px;
     margin-right: 5px;
 }
-.like-button {
+.vibe-button {
     color: #007bff;
     display: flex;
     align-items: center;
     cursor: pointer;
 }
-.like-count{
+.vibe-count{
     margin-right: 20px;
 }
-.like-button span {
+.vibe-button span {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.like-button.active {
-    background-color: #007bff;
-    color: #fff;
-}
-
 .comment-button {
     color: #007bff;
 }
-.post-actions button:hover {
-    color: #0056b3;
+
+.post-actions {
+    display: flex;
 }
 
 .see-more-button {
@@ -258,11 +254,6 @@ label#uploadLabel:active {
 .username {
     text-align: left;
 }  
-
-#likebutton {
-    margin-top: 18px;
-    margin-left: 8px;
-}
 
 .year, .register, .login {
     margin-top: 50px;

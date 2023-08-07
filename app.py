@@ -1,18 +1,14 @@
 from threading import Thread
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session, send_from_directory
+from flask import Flask, flash, redirect, render_template, request, session, send_from_directory, jsonify
 from flask_session import Session
-from flask_mail import Mail, Message
+from flask_mail import Mail
 from werkzeug.security import check_password_hash, generate_password_hash
-from werkzeug.utils import secure_filename
 from helper import *
 from dotenv import load_dotenv
 
-
-import random
-import string
 import os
-import uuid
+
 
 load_dotenv()
 
@@ -60,6 +56,8 @@ def index():
 
         for post in rows:
 
+            post_id = post['id']
+            print(post_id)
             fullname = post['fullname']
             post_username = post['username']
             post_content = post['description']
@@ -78,7 +76,7 @@ def index():
         
         posts.reverse()
 
-        return render_template("index.html", username = username, image = picture_path, posts = posts)
+        return render_template("index.html", post_id = post_id, username = username, image = picture_path, posts = posts)
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -204,21 +202,6 @@ def register():
             elif status.lower() == "staff":
                 return redirect("/staff")
 
-        
-
-def exists_user(username):
-
-    rows = db.execute("SELECT * FROM user WHERE username = ?", username)
-    
-    return len(rows) != 0
-
-def exists_email(email):
-
-    rows = db.execute("SELECT * FROM user WHERE email = ?", email)
-
-    return len(rows) != 0
-
-
 @app.route("/year", methods = ["GET", "POST"])
 @registration_required
 def year():
@@ -258,70 +241,6 @@ def year():
             db.execute("UPDATE user SET yearorposition = ?, hash = ? WHERE id = ?", year, generate_password_hash(password), id)
             return redirect("/")
 
-
-def validate_password(password, confirmation):
-
-    if not password:
-        flash("Provide a password")
-        return redirect("/year")
-    
-    if not confirmation:
-        flash("Confirm your password")
-        return redirect("/year")
-    
-    if password != confirmation:
-        flash("Passwords do not match")
-        return redirect("/year")
-    
-    if len(password) < 8:
-        flash("Password must be at least 8 characters")
-        return redirect("/year")
-    
-    if not any(char.isdigit() for char in password):
-        flash("Password must contain at least one number")
-        return redirect("/year")
-    
-    if not any(char.isupper() for char in password):
-        flash("Password must contain at least one uppercase letter")
-        return redirect("/year")
-    
-    if not any(char.islower() for char in password):
-        flash("Password must contain at least one lowercase letter")
-        return redirect("/year")
-    
-    return True
-
-def generate_code():
-    characters = string.ascii_letters + string.digits + string.punctuation
-    code = ''.join(random.choice(characters) for _ in range(6))
-    return code
-
-def send_async_email(app, msg):
-    with app.app_context():
-        mail.send(msg)
-
-def send_email(email, code):
-    sending_email = os.getenv("MAIL_USERNAME")
-    msg = Message('Authentication Code', sender = sending_email, recipients=[email])
-    msg.body = f"""
-    Hi,
-    
-    Someone tried to sign up for a Community account
-    with {email} as their email 
-    address. If this was you, enter this confirmation code 
-    in the app to complete the process: 
-    
-    Code: {code}
-
-    From,
-    Community
-    """
-
-    thread = Thread(target=send_async_email, args=(app, msg))
-    thread.start()
-
-    return True
-
 @app.route("/logout")
 def logout():
     """Log user out"""
@@ -332,50 +251,6 @@ def logout():
     # Redirect user to login form
     return redirect("/login")
 
-def picture_handler(image_file, location): 
-
-    filename = image_file.filename
-    if image_file and allowed_file(filename):
-        savedir = f"assets/{location}/" 
-        os.makedirs(savedir, exist_ok=True)
-        unique_filename = generate_unique_filename(filename)
-        image_path = os.path.join(savedir, unique_filename)
-        image_file.save(image_path) 
-        db.execute("INSERT INTO image (imagePath) VALUES(?)", image_path)
-        
-        image_id = db.execute("SELECT id FROM image where imagePath = ?", image_path)[0]['id']
-        return image_id
-
-    else:
-
-        return False
-
-def deletePicture(id):
-
-    imagePath = db.execute("SELECT imagePath FROM image where id = ?", id)[0]['imagePath']
-    db.execute("DELETE FROM image WHERE id = ?", id)
-    
-    try:
-        os.remove(imagePath)
-        return True
-    except FileNotFoundError:
-        return False
-    except OSError as e:
-        return e
-
-def cleanfile(id):
-    response = deletePicture(id)
-    if response != True:
-        print(response)
-
-
-def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}  # Add any other allowed extensions
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def generate_unique_filename(filename):
-    unique_filename = str(uuid.uuid4()) + '_' + secure_filename(filename)
-    return unique_filename
 
 @app.route("/newpost", methods = ["GET", "POST"])
 @login_required
@@ -417,3 +292,42 @@ def user_details():
     picture_path = db.execute("SELECT imagePath FROM image where id = ?", image_id)[0]['imagePath']
 
     return username, picture_path, fullname
+
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
+
+def send_email(email, code):
+    sending_email = os.getenv("MAIL_USERNAME")
+    msg = Message('Authentication Code', sender = sending_email, recipients=[email])
+    msg.body = f"""
+    Hi,
+    
+    Someone tried to sign up for a Community account
+    with {email} as their email 
+    address. If this was you, enter this confirmation code 
+    in the app to complete the process: 
+    
+    Code: {code}
+
+    From,
+    Community
+    """
+
+    thread = Thread(target=send_async_email, args=(app, msg))
+    thread.start()
+
+    return True
+
+@app.route("/liked/<path:post_id>", methods=["POST"])
+@login_required
+def liked(post_id):
+
+    if liked_already(session['user_id'], post_id):
+        return jsonify({'error': 'You have already liked this post'})
+    else:
+        db.execute("INSERT INTO liked(postId, userId) values(?,?)", post_id, session("user_id"))
+        rows = db.execute("SELECT * FROM liked WHERE postId = ?", post_id)
+
+        return jsonify({'like_count': len(rows)}), 200
+
