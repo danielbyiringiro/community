@@ -276,7 +276,7 @@ def newpost():
 
         if image_id:
             picture_path = db.execute("SELECT imagePath from image where id = ?", image_id)[0]['imagePath']
-            db.execute("INSERT INTO post(userId, username, fullname, description, userPicturePath, picturePath, likes) values(?,?,?,?,?,?,?)", userId, username, fullname, postContent, userPicturePath, picture_path, 0)
+            db.execute("INSERT INTO post(userId, username, fullname, description, userPicturePath, picturePath) values(?,?,?,?,?,?)", userId, username, fullname, postContent, userPicturePath, picture_path)
             return redirect("/")
 
         db.execute("INSERT INTO post(userId, username, fullname, description, userPicturePath, likes) values(?,?,?,?,?,?)", userId, username, fullname, postContent, userPicturePath, 0)
