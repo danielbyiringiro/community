@@ -62,15 +62,17 @@ def index():
             post_content = post['description']
             userPicturePath = post['userPicturePath']
             picturepath = post['picturePath'] if not None else None
-            likes = post['likes']
+            rows = db.execute("SELECT * FROM liked WHERE postId = ?", post_id)
+            likes = len(rows)
             created_at = post['created_at']
             created_at = time_format(created_at)
             userId = post['userId']
             yeargroup = db.execute("SELECT yearorposition FROM user WHERE id = ? ", userId)[0]['yearorposition']
-            yeargroup = str(yeargroup)[2:]
-            yeargroup = f"C'{yeargroup}"
+            yeargroup = yeargroup_format(yeargroup)
+            major = db.execute("SELECT major FROM user WHERE id = ?", userId)[0]['major']
+            major = major_format(major)
 
-            post_details = {'class': yeargroup, 'fullname' : fullname, 'postContent': post_content, 'username': post_username, 'profilePicturePath': userPicturePath, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'class': yeargroup}
+            post_details = {'class': yeargroup, 'fullname' : fullname, 'postContent': post_content, 'username': post_username, 'profilePicturePath': userPicturePath, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'class': yeargroup, 'post_id': post_id, 'major': major}
             posts.append(post_details)
         
         posts.reverse()
@@ -208,12 +210,14 @@ def year():
     if request.method == "GET":
 
         years = list(range(2002,2028))
+        years.reverse()
         majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
         return render_template("year.html", id = session["registration_id"], years = years, majors = majors)
     
     if request.method == "POST":
 
         year = request.form.get("class")
+        major = request.form.get("major")
         password = request.form.get("password")
         confirmation = request.form.get("confirm")
         code = request.form.get("code")
@@ -227,7 +231,7 @@ def year():
         userCode = db.execute("SELECT regnumber FROM user WHERE id = ?", id)
         userCode = userCode[0]["regnumber"]
 
-        print(f"Code: {code}, User Code: {userCode}")
+        #print(f"Code: {code}, User Code: {userCode}")
         if not code or code != userCode:
             flash("Invalid code")
             return redirect("/year")
@@ -237,7 +241,7 @@ def year():
 
         if message == True:
             session["user_id"] = id
-            db.execute("UPDATE user SET yearorposition = ?, hash = ? WHERE id = ?", year, generate_password_hash(password), id)
+            db.execute("UPDATE user SET yearorposition = ?, major = ?, hash = ? WHERE id = ?", year, major, generate_password_hash(password), id)
             return redirect("/")
 
 @app.route("/logout")
@@ -318,15 +322,16 @@ def send_email(email, code):
 
     return True
 
-@app.route("/liked/<path:post_id>", methods=["POST"])
+@app.route("/liked/<post_id>", methods=["POST"])
 @login_required
 def liked(post_id):
 
-    if liked_already(session['user_id'], post_id):
-        return jsonify({'error': 'You have already liked this post'})
+    liked = liked_already(session['user_id'], post_id)
+    if liked:
+        db.execute("DELETE FROM liked WHERE postId = ? and userId = ?", post_id, session['user_id'])
     else:
-        db.execute("INSERT INTO liked(postId, userId) values(?,?)", post_id, session("user_id"))
-        rows = db.execute("SELECT * FROM liked WHERE postId = ?", post_id)
-
-        return jsonify({'like_count': len(rows)}), 200
+        db.execute("INSERT INTO liked(postId, userId) values(?,?)", post_id, session["user_id"])
+    
+    rows = db.execute("SELECT * FROM liked WHERE postId = ?", post_id)
+    return jsonify({"likes":len(rows), "liked":liked})
 

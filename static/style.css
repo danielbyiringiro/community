@@ -219,14 +219,6 @@ label#uploadLabel:active {
     align-items: center;
     cursor: pointer;
 }
-.vibe-count{
-    margin-right: 20px;
-}
-.vibe-button span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
 .comment-button {
     color: #007bff;
@@ -234,12 +226,6 @@ label#uploadLabel:active {
 
 .post-actions {
     display: flex;
-}
-
-.see-more-button {
-    display: block;
-    color: #007bff;
-    cursor: pointer;
 }
 
 .belowtext {
@@ -255,7 +241,12 @@ label#uploadLabel:active {
     text-align: left;
 }  
 
-.year, .register, .login {
+.year, .register, .login 
+{
     margin-top: 50px;
 }
 
+.strong
+{
+    margin-left: -10px;
+}

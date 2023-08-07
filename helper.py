@@ -187,6 +187,22 @@ def generate_unique_filename(filename):
     unique_filename = str(uuid.uuid4()) + '_' + secure_filename(filename)
     return unique_filename
 
-def liked_already(userId,postId):
+def liked_already(userId, postId):
     rows = db.execute("SELECT * FROM liked WHERE postId = ? and userId = ?", postId, userId)
     return len(rows) != 0
+
+def yeargroup_format(yeargroup):
+
+    yeargroup = str(yeargroup)[2:]
+    yeargroup = f"C'{yeargroup}"
+    return yeargroup
+
+def major_format(major):
+
+    major = major.split()
+    combination= ""
+    for word in major:
+        letter = word[0]
+        combination += letter
+    
+    return combination

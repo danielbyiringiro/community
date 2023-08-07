@@ -4,6 +4,10 @@
     Home
 {% endblock %}
 
+{% block style %}
+    <script type="text/javascript" src="/static/index.js"></script>
+{% endblock %}
+
 {% block main %}
 <div class="container">
     <form id="postForm" class="flex-container">
@@ -32,46 +36,19 @@
             </div>
         {% endif %}
         <div class="post-actions">
-            <button class="vibe-button" data-post-id="{{ post['post_id'] }}">
-                <img src="/static/vibe.png" alt="vibe">
-                Vibe
+            <button class="vibe-button" onclick="like({{post['post_id']}})">
+                <img id="vibe-image-{{post['post_id']}}" src="/static/vibe.png" alt="vibe">
+                <strong>
+                    <span id="vibes-count-{{post['post_id']}}">{{post['likes']}}</span>
+                    <span class="strong">Vibes</span>
+                </strong>
             </button>
             <button class="comment-button">
                 <img src="/static/comment.png" alt="comment">
-                Comment
+                <strong>Comment</strong>
             </button>
             <br>
         </div>
     </div>
-{% endfor %}
-<script>
-    function openPostEditor()
-    {
-        const url = "/newpost";
-        window.location.href = url;
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const likeButtons = document.querySelectorAll('.vibe-button');
-        likeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const postId = this.getAttribute('data-post-id');
-                alert(`${postId}`)
-                likePost(postId);
-            });
-        });
-    
-    function likePost(postId) {
-    // Send an AJAX request to the Flask route to handle the like functionality
-    fetch(`/like_post/${postId}`, { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-            // Update the "like" count in the frontend without reloading the page
-            const likeCountElement = document.querySelector(`.post[data-post-id="${postId}"] .like-count`);
-            likeCountElement.textContent = `Likes: ${data.like_count}`;
-        })
-        .catch(error => console.error('Error:', error));
-}
-});
-</script>
+{% endfor %} 
 {% endblock %}
