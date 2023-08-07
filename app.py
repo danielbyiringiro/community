@@ -57,7 +57,6 @@ def index():
         for post in rows:
 
             post_id = post['id']
-            print(post_id)
             fullname = post['fullname']
             post_username = post['username']
             post_content = post['description']
@@ -76,7 +75,7 @@ def index():
         
         posts.reverse()
 
-        return render_template("index.html", post_id = post_id, username = username, image = picture_path, posts = posts)
+        return render_template("index.html", username = username, image = picture_path, posts = posts)
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
