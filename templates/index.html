@@ -19,7 +19,7 @@
             <img src="{{post['profilePicturePath']}}" class="horizontal-image" alt="Profile Picture">
             <span class="post-username">
                 <p class="username">{{post['fullname']}}</p>
-                <p class="belowtext">{{post['class']}} CS |  {{post['time']}}</p>
+                <p class="belowtext">{{post['class']}} {{post['major']}} |  {{post['time']}}</p>
             </span>
         </div>
         <br>
@@ -32,19 +32,15 @@
             </div>
         {% endif %}
         <div class="post-actions">
-            <button class="like-button">
-                <span>
-                    <img src="/static/like.png" alt="like">
-                    <p id="likebutton">Like</p>
-                </span>
+            <button class="vibe-button" data-post-id="{{ post['post_id'] }}">
+                <img src="/static/vibe.png" alt="vibe">
+                Vibe
             </button>
             <button class="comment-button">
                 <img src="/static/comment.png" alt="comment">
                 Comment
             </button>
             <br>
-            <span id="like-count">{{post['likes']}} Likes</span>
-            <span id="comment-count">3 Comments</span>
         </div>
     </div>
 {% endfor %}
@@ -54,5 +50,28 @@
         const url = "/newpost";
         window.location.href = url;
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const likeButtons = document.querySelectorAll('.vibe-button');
+        likeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const postId = this.getAttribute('data-post-id');
+                alert(`${postId}`)
+                likePost(postId);
+            });
+        });
+    
+    function likePost(postId) {
+    // Send an AJAX request to the Flask route to handle the like functionality
+    fetch(`/like_post/${postId}`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            // Update the "like" count in the frontend without reloading the page
+            const likeCountElement = document.querySelector(`.post[data-post-id="${postId}"] .like-count`);
+            likeCountElement.textContent = `Likes: ${data.like_count}`;
+        })
+        .catch(error => console.error('Error:', error));
+}
+});
 </script>
 {% endblock %}
