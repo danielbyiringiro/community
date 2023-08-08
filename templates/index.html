@@ -22,7 +22,7 @@
         <div class="post-header">
             <img src="{{post['profilePicturePath']}}" class="horizontal-image" alt="Profile Picture">
             <span class="post-username">
-                <p class="username">{{post['fullname']}}</p>
+                <p class="username">{{post['username']}}</p>
                 <p class="belowtext">{{post['class']}} {{post['major']}} |  {{post['time']}}</p>
             </span>
         </div>
@@ -41,18 +41,26 @@
                     <img id="vibe-image-{{post['post_id']}}" data-post-id="{{post['post_id']}}" src="" alt="vibe">
                     <strong>
                         <span id="vibes-count-{{post['post_id']}}">{{post['likes']}}</span>
-                        <span class="strong">Vibes</span>
+                        <span class="strong">vibes</span>
                     </strong>
                 </button>
                 <button class="comment-button">
                     <img src="/static/comment.png" alt="comment">
-                    <strong>Comment</strong>
+                    <strong>
+                        <span id="comments-count-{{post['post_id']}}">{{post['comments']}}</span>
+                        <span class="strong">comments</span> 
+                    </strong>
                 </button>
             </div>
             <div class="comment-section">
-                <textarea class="comment-add" id="comment-input-{{post['post_id']}}" placeholder="Leave a comment..."></textarea>
-                <button onclick="addComment({{post['post_id']}})">Post</button>
-                <div id="comments-{{post['post_id']}}" class="comments"></div>
+                <div class="comment_area">
+                    <textarea class="comment-add" id="comment-input-{{post['post_id']}}" placeholder="Leave a comment..." required></textarea>
+                    <button onclick="addComment({{post['post_id']}}, {{session['user_id']}})" class="btn btn-secondary">Post</button>
+                </div>
+                <div class="most_recent">
+                    <span id="comments-username-{{post['post_id']}}"></span>
+                    <span id="comments-{{post['post_id']}}"></span>
+                </div>
             </div>
         </div>
     </div>

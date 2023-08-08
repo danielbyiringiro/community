@@ -57,22 +57,23 @@ def index():
         for post in rows:
 
             post_id = post['id']
-            fullname = post['fullname']
             post_username = post['username']
             post_content = post['description']
             userPicturePath = post['userPicturePath']
             picturepath = post['picturePath'] if not None else None
-            rows = db.execute("SELECT * FROM liked WHERE postId = ?", post_id)
-            likes = len(rows)
+            liked_rows = db.execute("SELECT * FROM liked WHERE postId = ?", post_id)
+            likes = len(liked_rows)
+            comment_rows = db.execute("SELECT * FROM comment WHERE POSTID = ?", post_id)
+            comments = len(comment_rows)
             created_at = post['created_at']
             created_at = time_format(created_at)
             userId = post['userId']
-            yeargroup = db.execute("SELECT yearorposition FROM user WHERE id = ? ", userId)[0]['yearorposition']
+            yeargroup = db.execute("SELECT yearorposition FROM user WHERE id = ?", userId)[0]['yearorposition']
             yeargroup = yeargroup_format(yeargroup)
             major = db.execute("SELECT major FROM user WHERE id = ?", userId)[0]['major']
             major = major_format(major)
 
-            post_details = {'class': yeargroup, 'fullname' : fullname, 'postContent': post_content, 'username': post_username, 'profilePicturePath': userPicturePath, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'class': yeargroup, 'post_id': post_id, 'major': major}
+            post_details = {'class': yeargroup, 'postContent': post_content, 'username': post_username, 'profilePicturePath': userPicturePath, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'class': yeargroup, 'post_id': post_id, 'major': major, 'comments': comments}
             posts.append(post_details)
         
         posts.reverse()
@@ -335,3 +336,47 @@ def liked(post_id):
     rows = db.execute("SELECT * FROM liked WHERE postId = ?", post_id)
     return jsonify({"likes":len(rows), "liked":liked})
 
+@app.route("/addcomment/", methods = ["POST"])
+@login_required
+def comment():
+
+    try:
+        comment_data = request.get_json()
+        post_id = comment_data['post_id']
+        user_id = comment_data['user_id']
+        text = comment_data['text']
+        db.execute("INSERT INTO COMMENT(COMMENT_TEXT, POSTID, userId) VALUES(?,?,?)", text, post_id, user_id)
+        comments_count = db.execute("SELECT * FROM COMMENT WHERE POSTID = ?", post_id)
+        comments_count = len(comments_count)
+        username , _ , _ = user_details()
+
+        return jsonify({"success":True, "count": comments_count, "text" : text, "username" : username})
+    
+    except Exception as e:
+
+        return jsonify({"success":False, "error" : e})
+
+@app.route('/comments', methods=['POST'])
+@login_required
+def comments():
+
+    try:
+
+        data = request.get_json()
+        post_id = data['post_id']
+        most_recent = db.execute("SELECT userId, comment_text FROM COMMENT WHERE POSTID = ? ORDER BY id DESC LIMIT 1", post_id)[0]
+        
+        if most_recent:
+            userId = most_recent['userId']
+            username = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
+            text = most_recent['COMMENT_TEXT']
+
+            return jsonify({"success": True, "text":text, "username":username})
+        
+        else:
+
+            return jsonify({"success": True, "text": None})
+    
+    except Exception as e:
+
+        return jsonify({"success": False, "error":e})

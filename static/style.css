@@ -263,11 +263,25 @@ label#uploadLabel:active {
 
 .comment-section
 {
-    display: flex;
+    display: block;
     margin-top: 10px;
 }
 
 .vibe-comment
 {
     display: flex;
+}
+
+.comment_area, .most_recent {
+    display: flex;
+}
+
+.comment-username {
+    margin-right: 5px;
+    color: #c04040;
+    font-weight: bold;
+}
+
+#maroon {
+    color: #c04040;
 }
