@@ -279,7 +279,7 @@ def newpost():
             db.execute("INSERT INTO post(userId, username, fullname, description, userPicturePath, picturePath) values(?,?,?,?,?,?)", userId, username, fullname, postContent, userPicturePath, picture_path)
             return redirect("/")
 
-        db.execute("INSERT INTO post(userId, username, fullname, description, userPicturePath, likes) values(?,?,?,?,?,?)", userId, username, fullname, postContent, userPicturePath, 0)
+        db.execute("INSERT INTO post(userId, username, fullname, description, userPicturePath) values(?,?,?,?,?)", userId, username, fullname, postContent, userPicturePath)
         return redirect("/")
 
 

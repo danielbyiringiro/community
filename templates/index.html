@@ -36,18 +36,24 @@
             </div>
         {% endif %}
         <div class="post-actions">
-            <button class="vibe-button" onclick="like({{post['post_id']}})">
-                <img id="vibe-image-{{post['post_id']}}" src="/static/vibe.png" alt="vibe">
-                <strong>
-                    <span id="vibes-count-{{post['post_id']}}">{{post['likes']}}</span>
-                    <span class="strong">Vibes</span>
-                </strong>
-            </button>
-            <button class="comment-button">
-                <img src="/static/comment.png" alt="comment">
-                <strong>Comment</strong>
-            </button>
-            <br>
+            <div class="vibe-comment">
+                <button class="vibe-button" onclick="like({{post['post_id']}})">
+                    <img id="vibe-image-{{post['post_id']}}" data-post-id="{{post['post_id']}}" src="" alt="vibe">
+                    <strong>
+                        <span id="vibes-count-{{post['post_id']}}">{{post['likes']}}</span>
+                        <span class="strong">Vibes</span>
+                    </strong>
+                </button>
+                <button class="comment-button">
+                    <img src="/static/comment.png" alt="comment">
+                    <strong>Comment</strong>
+                </button>
+            </div>
+            <div class="comment-section">
+                <textarea class="comment-add" id="comment-input-{{post['post_id']}}" placeholder="Leave a comment..."></textarea>
+                <button onclick="addComment({{post['post_id']}})">Post</button>
+                <div id="comments-{{post['post_id']}}" class="comments"></div>
+            </div>
         </div>
     </div>
 {% endfor %} 

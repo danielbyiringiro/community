@@ -225,7 +225,7 @@ label#uploadLabel:active {
 }
 
 .post-actions {
-    display: flex;
+    display: block;
 }
 
 .belowtext {
@@ -249,4 +249,25 @@ label#uploadLabel:active {
 .strong
 {
     margin-left: -10px;
+}
+
+.comment-add
+{
+    resize: none;
+    border: none;
+    height:30px;
+    outline: none;
+    width: 100%;
+    position: relative;
+}
+
+.comment-section
+{
+    display: flex;
+    margin-top: 10px;
+}
+
+.vibe-comment
+{
+    display: flex;
 }
