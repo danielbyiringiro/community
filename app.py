@@ -57,7 +57,6 @@ def index():
         for post in rows:
 
             post_id = post['id']
-            post_username = post['username']
             post_content = post['description']
             userPicturePath = post['userPicturePath']
             picturepath = post['picturePath'] if not None else None
@@ -68,6 +67,7 @@ def index():
             created_at = post['created_at']
             created_at = time_format(created_at)
             userId = post['userId']
+            post_username = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
             yeargroup = db.execute("SELECT yearorposition FROM user WHERE id = ?", userId)[0]['yearorposition']
             yeargroup = yeargroup_format(yeargroup)
             major = db.execute("SELECT major FROM user WHERE id = ?", userId)[0]['major']
