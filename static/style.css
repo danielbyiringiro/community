@@ -285,3 +285,49 @@ label#uploadLabel:active {
 #maroon {
     color: #c04040;
 }
+
+.comment_div
+{
+    display: block;
+}
+
+.comment_details
+{
+    display: flex;
+    gap: 5px;
+}
+
+.user_details
+{
+    display: block;
+}
+.comment_text
+{
+    font-size: medium;
+    text-align: left;
+}
+.comment_picture
+{
+    height: 35px;
+    width: 35px;
+    border-radius: 50%;
+}
+.other_details
+{
+    display: flex;
+    gap: 5px;
+    margin-top: -20px;
+    font-weight: 400;
+    color: gray;
+}
+.comment_username
+{
+    text-align: left;
+    font-weight: bold;
+    margin-top: -5px;
+    color: #c04040;
+}
+.displayComments
+{
+    margin-top: -5px;
+}

@@ -44,7 +44,7 @@
                         <span class="strong">vibes</span>
                     </strong>
                 </button>
-                <button class="comment-button">
+                <button class="comment-button" onclick="loadComments({{post['post_id']}})">
                     <img src="/static/comment.png" alt="comment">
                     <strong>
                         <span id="comments-count-{{post['post_id']}}">{{post['comments']}}</span>
@@ -55,7 +55,7 @@
             <div class="comment-section">
                 <div class="comment_area">
                     <textarea class="comment-add" id="comment-input-{{post['post_id']}}" placeholder="Leave a comment..." required></textarea>
-                    <button onclick="addComment({{post['post_id']}}, {{session['user_id']}})" class="btn btn-secondary">Post</button>
+                    <button onclick="addComment({{post['post_id']}}, {{session['user_id']}})">Post</button>
                 </div>
                 <div class="most_recent">
                     <span id="comments-username-{{post['post_id']}}"></span>
@@ -63,6 +63,8 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="" id="display-comments-{{post['post_id']}}">
     </div>
 {% endfor %} 
 {% endblock %}

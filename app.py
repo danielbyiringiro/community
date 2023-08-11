@@ -360,23 +360,95 @@ def comment():
 @login_required
 def comments():
 
+    data = request.get_json()
+    post_id = data['post_id']
+    most_recent = db.execute("SELECT userId, comment_text FROM COMMENT WHERE POSTID = ? ORDER BY id DESC LIMIT 1", post_id)
+        
     try:
+        most_recent = most_recent[0]
+        userId = most_recent['userId']
+        username = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
+        text = most_recent['COMMENT_TEXT']
 
-        data = request.get_json()
-        post_id = data['post_id']
-        most_recent = db.execute("SELECT userId, comment_text FROM COMMENT WHERE POSTID = ? ORDER BY id DESC LIMIT 1", post_id)[0]
-        
-        if most_recent:
-            userId = most_recent['userId']
-            username = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
-            text = most_recent['COMMENT_TEXT']
-
-            return jsonify({"success": True, "text":text, "username":username})
-        
-        else:
-
-            return jsonify({"success": True, "text": None})
+        return jsonify({"success": True, "text":text, "username":username})
     
-    except Exception as e:
+    except IndexError as e:
 
-        return jsonify({"success": False, "error":e})
+        return jsonify({"success": False, "text": str(e)})
+    
+@app.route("/loadcomments", methods=["POST"])
+def loadcomments():
+
+    post_id = request.get_json()['post_id']
+    comments = getallcomments(post_id)
+    if len(comments) > 0:
+        return jsonify({"success": True, "comments": comments})
+    else:
+        return jsonify({"success":False})
+
+def getallcomments(post_id):
+
+    comments = db.execute("SELECT comment_text, created_at, userId FROM comment WHERE postid = ? order by created_at desc", post_id)
+    comments_list = []
+    for comment in comments:
+        text = comment['COMMENT_TEXT']
+        time = comment['CREATED_AT']
+        time = time_format(time)
+        userId = comment['userId']
+        pic_id = db.execute("SELECT pictureId FROM user WHERE id = ?", userId)
+        pic_id = pic_id[0]['pictureId']
+        userPicture = id_path(pic_id)
+        userName = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
+        classgroup = db.execute("SELECT yearorposition FROM user WHERE id = ?", userId)[0]['yearorposition']
+        classgroup = f"C'{classgroup[2:]}"
+        major = db.execute("SELECT major FROM user WHERE id = ?", userId)[0]['major']
+        major = major_format(major)
+        major = f"{major} |"
+        comment_dic = {"text":text, "time":time, "picture":userPicture, "username": userName, "class": classgroup, "major":major}
+        comments_list.append(comment_dic)
+    
+    return comments_list
+
+def id_path(picId):
+
+    path = db.execute("SELECT imagePath from image where id = ?", picId)[0]['imagePath']
+    
+    return path
+
+@app.route("/search", methods=["POST"])
+def search():
+
+    query = request.get_json()['query']
+    query = query.lower()
+    username_list = []
+
+    search_username_first = db.execute("SELECT username FROM user WHERE LOWER(username) LIKE ? || '%' LIMIT 5", ('%' + query.lower(),))
+
+    search_username_middle = db.execute("SELECT username FROM user WHERE LOWER(username) LIKE '%' || ? || '%' LIMIT 5", (query.lower(),))
+
+    search_fullname_first = db.execute("SELECT username FROM user WHERE LOWER(name) LIKE ? || '%' LIMIT 5", ('%' + query.lower(),))
+
+    search_fullname_middle = db.execute("SELECT username FROM user WHERE LOWER(name) LIKE '%' || ? || '%' LIMIT 5", (query.lower(),))
+
+    for user in search_username_first:
+        username_list.append(user['username'])
+
+    for user in search_username_middle:
+        username_list.append(user['username'])
+    
+    for user in search_fullname_first:
+        username_list.append(user['username'])
+
+    for user in search_fullname_middle:
+        username_list.append(user['username'])
+
+    username_set = set(username_list)
+    username_list = list(username_set)
+    print(username_list)
+    if len(username_list) > 0:
+        return jsonify({"success": True, "results":username_list})
+    else:
+        return jsonify({"success": False, "message":"User not found"})
+
+
+
