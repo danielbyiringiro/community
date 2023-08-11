@@ -223,11 +223,9 @@ function searchquery()
     })
     .then(res => res.json())
     .then(data => {
-        alert(2);
 
         if (data['success'] === true)
         {
-            alert(1);
             var resultsDiv = document.getElementById('search-results');
             var data = data['results'];
 
