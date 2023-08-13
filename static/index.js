@@ -214,10 +214,12 @@ function initializeAllLikeStatus() {
 
 var queryexecuted = false;
 
-function restquery()
+function searchquery()
 {
-    var query = document.querySelector('.search-input').value;
+    var inputElement = document.querySelector('.search-input');
+    var query = inputElement.value;
     var resultsDiv = document.getElementById('search-results');
+    var resultsContainer = document.getElementById('search-results');
 
     if (query === '' || query === null)
     {
@@ -243,84 +245,44 @@ function restquery()
 
         if (data['success'] === true)
         {
+            resultsContainer = document.getElementById('search-results');
+            if (query.length > 0) {
+                resultsContainer.style.display = 'block';
+                resultsContainer.style.top = inputElement.offsetTop + inputElement.offsetHeight + 'px';
+                resultsContainer.style.left = inputElement.offsetLeft + 'px';
+                
+            } 
+            else 
+            {
+                resultsContainer.style.display = 'none';
+            }
             var data = data['results'];
 
-            for( var i = 0; i < data.length; i++)
-            {
-                result = data[i];
-                var resultElement = document.createElement('p');
-                resultElement.textContent = result;
-                resultsDiv.appendChild(resultElement);
-            }
+            var ul = document.createElement('ul');
+            ul.className = 'list-group';
+
+            data.forEach(result => {
+                var li = document.createElement('li');
+                li.className = 'list-group-item';
+                var full_name = result['fullname'];
+                var username = result['username'];
+                li.innerHTML = "<div><div>" + full_name + "</div>" + "<div><a href='/profile/" + username + "'>" + "@" + "<strong>" + username + "</strong>" + "</a></div></div>";
+                li.classList.add('block');
+                ul.appendChild(li);
+            });
+
+            resultsContainer.appendChild(ul);
             queryexecuted = true;
         }
         else
         {
-            console.log(data);
-            console.log(data['message']);
-            alert(data['message']);
+            resultsContainer.classList.add('no-results');
+            resultsContainer.textContent = 'No results found';
         }
     })
     .catch(error => console.error('Error:', error));
     
 }
-
-function searchquery() {
-    var inputElement = document.querySelector('.search-input');
-    var query = inputElement.value;
-
-    // You can use an AJAX request to fetch search results based on the query.
-    // For example:
-    // fetch('/search?query=' + encodeURIComponent(query))
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         displaySearchResults(data);
-    //     });
-
-    // For demonstration purposes, let's assume 'searchResults' is an array of search results.
-    var searchResults = [
-        "Daniel Byiringiro",
-        "Nana Addo Dankwa Akufo-Addo",
-        "Search result 3",
-        "4",
-        "5"
-    ];
-
-    var resultsContainer = document.getElementById('search-results');
-    if (query.length > 0) {
-        resultsContainer.style.display = 'block';
-        resultsContainer.style.top = inputElement.offsetTop + inputElement.offsetHeight + 'px';
-        resultsContainer.style.left = inputElement.offsetLeft + 'px';
-        
-        // Populate search results using the displaySearchResults function
-    } else {
-        resultsContainer.style.display = 'none';
-    }
-
-    displaySearchResults(searchResults);
-}
-
-function displaySearchResults(results) {
-    var resultsContainer = document.getElementById('search-results');
-    resultsContainer.innerHTML = '';
-
-    if (results.length > 0) {
-        var ul = document.createElement('ul');
-        ul.className = 'list-group';
-
-        results.forEach(result => {
-            var li = document.createElement('li');
-            li.className = 'list-group-item';
-            li.textContent = result;
-            ul.appendChild(li);
-        });
-
-        resultsContainer.appendChild(ul);
-    } else {
-        resultsContainer.textContent = 'No results found.';
-    }
-}
-
 
 document.addEventListener('DOMContentLoaded', initializeAllLikeStatus);
 

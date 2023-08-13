@@ -444,9 +444,16 @@ def search():
 
     username_set = set(username_list)
     username_list = list(username_set)
-    print(username_list)
+    
+    user_list = []
+
+    for user in username_list:
+        fullname = db.execute("SELECT name FROM user WHERE username = ?", user)[0]['name']
+        user_dict = {"fullname": fullname, "username":user}
+        user_list.append(user_dict)
+
     if len(username_list) > 0:
-        return jsonify({"success": True, "results":username_list})
+        return jsonify({"success": True, "results":user_list})
     else:
         return jsonify({"success": False, "message":"User not found"})
 
