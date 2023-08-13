@@ -3,17 +3,17 @@ var commentsLoaded = false;
 function loadComments(post_id)
 {
     var commentsDiv = document.getElementById(`display-comments-${post_id}`);
+    const commentSection = document.getElementById(`comments-${post_id}`);
+    const commentUsername = document.getElementById(`comments-username-${post_id}`);
 
     if (commentsLoaded) { 
         commentsDiv.innerHTML = '';
-        commentsDiv.classList.remove("container");
         commentsDiv.classList.remove("displayCommentss");
+        commentSection.classList.remove('disapear');
+        commentUsername.classList.remove('disapear');
         commentsLoaded = false;
         return;
     }
-
-    commentsDiv.classList.add("container");
-    commentsDiv.classList.add("displayComments");    
 
     fetch("/loadcomments", {
         method: "POST",
@@ -27,6 +27,9 @@ function loadComments(post_id)
         if (data['success'] === true)
         {
             var comments = data['comments'];
+            commentSection.classList.add('disapear');
+            commentUsername.classList.add('disapear');
+            commentsDiv.classList.add("displayComments");
 
             for (var i = 0; i < comments.length; i++)
             {
@@ -209,9 +212,23 @@ function initializeAllLikeStatus() {
     });
 }
 
-function searchquery()
+var queryexecuted = false;
+
+function restquery()
 {
     var query = document.querySelector('.search-input').value;
+    var resultsDiv = document.getElementById('search-results');
+
+    if (query === '' || query === null)
+    {
+        resultsDiv.innerHTML = '';
+        return;
+    }
+
+    if (queryexecuted === true)
+    {
+        resultsDiv.innerHTML = '';
+    }
 
     // Send a fetch request to the Flask server
     fetch('/search', {
@@ -226,7 +243,6 @@ function searchquery()
 
         if (data['success'] === true)
         {
-            var resultsDiv = document.getElementById('search-results');
             var data = data['results'];
 
             for( var i = 0; i < data.length; i++)
@@ -236,6 +252,7 @@ function searchquery()
                 resultElement.textContent = result;
                 resultsDiv.appendChild(resultElement);
             }
+            queryexecuted = true;
         }
         else
         {
@@ -247,6 +264,63 @@ function searchquery()
     .catch(error => console.error('Error:', error));
     
 }
+
+function searchquery() {
+    var inputElement = document.querySelector('.search-input');
+    var query = inputElement.value;
+
+    // You can use an AJAX request to fetch search results based on the query.
+    // For example:
+    // fetch('/search?query=' + encodeURIComponent(query))
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         displaySearchResults(data);
+    //     });
+
+    // For demonstration purposes, let's assume 'searchResults' is an array of search results.
+    var searchResults = [
+        "Daniel Byiringiro",
+        "Nana Addo Dankwa Akufo-Addo",
+        "Search result 3",
+        "4",
+        "5"
+    ];
+
+    var resultsContainer = document.getElementById('search-results');
+    if (query.length > 0) {
+        resultsContainer.style.display = 'block';
+        resultsContainer.style.top = inputElement.offsetTop + inputElement.offsetHeight + 'px';
+        resultsContainer.style.left = inputElement.offsetLeft + 'px';
+        
+        // Populate search results using the displaySearchResults function
+    } else {
+        resultsContainer.style.display = 'none';
+    }
+
+    displaySearchResults(searchResults);
+}
+
+function displaySearchResults(results) {
+    var resultsContainer = document.getElementById('search-results');
+    resultsContainer.innerHTML = '';
+
+    if (results.length > 0) {
+        var ul = document.createElement('ul');
+        ul.className = 'list-group';
+
+        results.forEach(result => {
+            var li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.textContent = result;
+            ul.appendChild(li);
+        });
+
+        resultsContainer.appendChild(ul);
+    } else {
+        resultsContainer.textContent = 'No results found.';
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', initializeAllLikeStatus);
 

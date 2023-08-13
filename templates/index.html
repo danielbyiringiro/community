@@ -20,9 +20,11 @@
 {% for post in posts %}
     <div class="post-container">
         <div class="post-header">
-            <img src="{{post['profilePicturePath']}}" class="horizontal-image" alt="Profile Picture">
+            <a href="/users/{{post['username']}}" class="header_link">
+                <img src="{{post['profilePicturePath']}}" class="horizontal-image" alt="Profile Picture">
+            </a>
             <span class="post-username">
-                <p class="username">{{post['username']}}</p>
+                <p class="username"><a href="/users/{{post['username']}}">{{post['username']}}</a></p>
                 <p class="belowtext">{{post['class']}} {{post['major']}} |  {{post['time']}}</p>
             </span>
         </div>
@@ -61,10 +63,10 @@
                     <span id="comments-username-{{post['post_id']}}"></span>
                     <span id="comments-{{post['post_id']}}"></span>
                 </div>
+                <div class="" id="display-comments-{{post['post_id']}}">
+                </div>
             </div>
         </div>
-    </div>
-    <div class="" id="display-comments-{{post['post_id']}}">
     </div>
 {% endfor %} 
 {% endblock %}
