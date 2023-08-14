@@ -280,7 +280,7 @@ def newpost():
             db.execute("INSERT INTO post(userId, fullname, description, userPicturePath, picturePath) values(?,?,?,?,?)", userId, fullname, postContent, userPicturePath, picture_path)
             return redirect("/")
 
-        db.execute("INSERT INTO post(userId, fullname, description, userPicturePath) values(?,?,?,?,?)", userId, fullname, postContent, userPicturePath)
+        db.execute("INSERT INTO post(userId, fullname, description, userPicturePath) values(?,?,?,?)", userId, fullname, postContent, userPicturePath)
         return redirect("/")
 
 
@@ -296,6 +296,23 @@ def user_details():
     picture_path = db.execute("SELECT imagePath FROM image where id = ?", image_id)[0]['imagePath']
 
     return username, picture_path, fullname
+
+def user_profile(username):
+
+    fullname = db.execute("SELECT name FROM user WHERE username = ?", username)[0]['name']
+    image_id = db.execute("SELECT pictureId FROM user WHERE username = ?", username)[0]['pictureId']
+    path = id_path(image_id)
+    classgroup = db.execute("SELECT yearorposition FROM user WHERE username = ?", username)[0]['yearorposition']
+    classgroup = f"C'{classgroup[2:]}"
+    major = db.execute("SELECT major FROM user WHERE username = ?", username)[0]['major']
+    date = db.execute("SELECT created_at FROM user WHERE username = ?", username)[0]['created_at']
+    date = time_format(date)
+    date = date.split()
+    date = f"{date[1]} {date[2]}"
+    perimeter = 0
+
+    return fullname, path, classgroup, major, date, perimeter
+
 
 def send_async_email(app, msg):
     with app.app_context():
@@ -398,6 +415,7 @@ def getallcomments(post_id):
         pic_id = db.execute("SELECT pictureId FROM user WHERE id = ?", userId)
         pic_id = pic_id[0]['pictureId']
         userPicture = id_path(pic_id)
+        userPicture = f"/{userPicture}"
         userName = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
         classgroup = db.execute("SELECT yearorposition FROM user WHERE id = ?", userId)[0]['yearorposition']
         classgroup = f"C'{classgroup[2:]}"
@@ -416,6 +434,7 @@ def id_path(picId):
     return path
 
 @app.route("/search", methods=["POST"])
+@login_required
 def search():
 
     query = request.get_json()['query']
@@ -457,5 +476,60 @@ def search():
     else:
         return jsonify({"success": False, "message":"User not found"})
 
+@app.route("/users/<username>")
+@login_required
+def user(username):
+    
+    userId = db.execute("SELECT id FROM user WHERE username = ?", username)[0]['id']
+    bio = db.execute("SELECT bio FROM user WHERE id = ?", userId)[0]['bio'] if not None else ''
+    rows = db.execute("SELECT * FROM post WHERE userId = ?", userId)
+    length = len(rows)
+    print(f"Length is {length}")
+    if length > 0:
+        divexist = True
+    else:
+        divexist = False
+    
+    posts = []
+    fullname, path, classgroup, major, date, perimeter = user_profile(username)
 
+    for post in rows:
 
+        post_id = post['id']
+        post_content = post['description']
+        picturepath = post['picturePath'] if not None else None
+        liked_rows = db.execute("SELECT * FROM liked WHERE postId = ?", post_id)
+        likes = len(liked_rows)
+        comment_rows = db.execute("SELECT * FROM comment WHERE POSTID = ?", post_id)
+        comments = len(comment_rows)
+        created_at = post['created_at']
+        created_at = time_format(created_at)
+        p_major = major_format(major)
+        post_details = {'postContent': post_content, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'post_id': post_id, 'comments': comments, 'major':p_major, 'divexist': divexist}
+        posts.append(post_details)
+        
+    posts.reverse()
+
+    return render_template("profile.html", image = path, username = username, fullname = fullname, classgroup = classgroup, major = major, date = date, perimeter = perimeter, posts = posts, bio = bio)
+
+@app.route("/deletepost/<post_id>", methods=["POST"])
+@login_required
+def deletepost(post_id):
+
+    try:
+        db.execute("DELETE FROM COMMENT WHERE POSTID = ?", post_id)
+        db.execute("DELETE FROM LIKED WHERE postId = ?", post_id)
+        db.execute("DELETE FROM POST WHERE id = ?", post_id)
+        length = len(db.execute("SELECT * FROM POST WHERE userId = ?", session['user_id']))
+        return jsonify({"success":True, "length":length})
+    except Exception as e:
+        return jsonify({"error":str(e)})
+
+@app.route('/bio', methods = ["POST"])
+@login_required
+def bio():
+
+    bio = request.get_json()['bio']
+    userId = session['user_id']
+    db.execute('UPDATE user SET bio = ? WHERE id = ?', bio, userId)
+    return jsonify({"success": True, "bio":bio})

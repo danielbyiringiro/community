@@ -379,6 +379,53 @@ a:hover
     height: 30px;
 }
 
+.profile
+{
+    display: flex;
+    margin: 20px auto;
+    text-align: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.p_container 
+{
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-top: 35px;
+}
+
+.personal_details
+{
+    max-width: 400px;
+    display: block;
+    max-height: 600px;
+}
+
+.details 
+{
+    margin-top: 20px;
+}
+
+#profile_img 
+{
+    height: 120px;
+    width: 120px;
+    border-radius: 50%;
+}
+
+.fullname
+{
+    font-size: large;
+    font-weight: bold;
+}
+
+.dots
+{
+    height: 20px;
+    width: 20px;
+}
 @media (max-width: 500px)
 {
     .begin
@@ -390,4 +437,48 @@ a:hover
     {
     margin-top: 150px;
     }
+
+    .profile
+    {
+        display: block;
+    }
+}
+
+.post_header
+{
+    display: flex;
+    justify-content: space-between;
+}
+
+.dropdown-container 
+{
+    position: relative;
+    display: inline-block;
+}
+  
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+  
+.dropdown-container:hover .dropdown-content 
+{
+    display: block;
+}
+
+#delete_post
+{
+    padding: 10px;
+    width: 120px;
+    max-height: 50px;
+    border-radius: 10px;
+}
+  
+.edit , .done
+{
+    border-radius: 10px;
+    color: #c04040;
 }

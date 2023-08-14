@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{username}}
+{% endblock %}
+
+{% block style %}
+    <script type="text/javascript" src="/static/index.js"></script>
+{% endblock %}
+
+{% block main %}
+    <div class="profile">
+        <div class="p_container personal_details">
+            <div class="image">
+                <img src="/{{image}}" alt="pic" id="profile_img">
+                <hr>
+            </div>
+            <div class="details">
+                <p class="fullname">{{fullname}}</p>
+                <p style="color: #c04040;">@{{username}}</p>
+                <p>{{classgroup}} {{major}}</p>
+                <p> Joined On {{date}}</p>
+                <hr>
+            </div>
+            <div class="links">
+                <p>Perimeter : {{perimeter}}</p>
+                <p>Bio:</p>
+                <p id="bio">{{bio}}</p>
+                <div class="bio disapear">
+                    <div class="mb-3">
+                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="bioinput" name="email" placeholder="Bio" type="text" required>
+                    </div>
+                    <button class="done" onclick="Bio()">Done</button>
+                </div>
+                <button class="edit" onclick="editBio()">Edit Bio</button>
+            </div>
+        </div>
+        <div class="p_container personal_activity">
+            {% for post in posts %}
+                <div class="post-container">
+                    <div class="post_header">
+                        <div>
+                            <p class="belowtext">{{post['time']}}</p>
+                        </div>
+                        <div class="dropdown-container">
+                        <img src="/static/3dots.jpg" alt="3dots" class="dots" onclick="toggleDropdown(this)">
+                        <div class="dropdown-content" id="delete_post">
+                            <a onclick="deletePost({{post['post_id']}})">
+                            <p>Delete Post</p> 
+                            </a>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="post-content" id="postContent">
+                        {{post['postContent']}}
+                    </div>
+                    {% if post['picturePath'] %}
+                        <div class="post-image-container">
+                            <img class="post-image" src="/{{post['picturePath']}}" alt="Post Image">
+                        </div>
+                    {% endif %}
+                    <div class="post-actions">
+                        <div class="vibe-comment">
+                            <button class="vibe-button" onclick="like({{post['post_id']}})">
+                                <img id="vibe-image-{{post['post_id']}}" data-post-id="{{post['post_id']}}" src="" alt="vibe">
+                                <strong>
+                                    <span id="vibes-count-{{post['post_id']}}">{{post['likes']}}</span>
+                                    <span class="strong">vibes</span>
+                                </strong>
+                            </button>
+                            <button class="comment-button" onclick="loadComments({{post['post_id']}})">
+                                <img src="/static/comment.png" alt="comment">
+                                <strong>
+                                    <span id="comments-count-{{post['post_id']}}">{{post['comments']}}</span>
+                                    <span class="strong">comments</span> 
+                                </strong>
+                            </button>
+                        </div>
+                        <div class="comment-section">
+                            <div class="comment_area">
+                                <textarea class="comment-add" id="comment-input-{{post['post_id']}}" placeholder="Leave a comment..." required></textarea>
+                                <button onclick="addComment({{post['post_id']}}, {{session['user_id']}})">Post</button>
+                            </div>
+                            <div class="most_recent">
+                                <span id="comments-username-{{post['post_id']}}"></span>
+                                <span id="comments-{{post['post_id']}}"></span>
+                            </div>
+                            <div class="" id="display-comments-{{post['post_id']}}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

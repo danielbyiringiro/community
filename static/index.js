@@ -266,7 +266,7 @@ function searchquery()
                 li.className = 'list-group-item';
                 var full_name = result['fullname'];
                 var username = result['username'];
-                li.innerHTML = "<div><div>" + full_name + "</div>" + "<div><a href='/profile/" + username + "'>" + "@" + "<strong>" + username + "</strong>" + "</a></div></div>";
+                li.innerHTML = "<div><div>" + full_name + "</div>" + "<div><a href='/users/" + username + "'>" + "@" + "<strong>" + username + "</strong>" + "</a></div></div>";
                 li.classList.add('block');
                 ul.appendChild(li);
             });
@@ -284,7 +284,88 @@ function searchquery()
     
 }
 
-document.addEventListener('DOMContentLoaded', initializeAllLikeStatus);
+function toggleDropdown(image) 
+{
+    // Toggle the display of the dropdown content
+    var dropdownContent = image.nextElementSibling;
+    dropdownContent.style.display = (dropdownContent.style.display === "block") ? "none" : "block";
+}
+  
+function deletePost(post_id) 
+{
+    
+    var confirmDelete = confirm("Are you sure you want to delete this post?");
+    if (confirmDelete) 
+    {
+        fetch(`/deletepost/${post_id}`, {method: 'POST'})
+        .then((res) => res.json())
+        .then((data) => {
+            if (data['success'] === true) 
+            {
+                if (data['length'] === 0)
+                {
+                    const div_class = document.querySelector(".p_container.personal_activity");
+                    div_class.style.display = "none";
+                    return;
+                }
+                window.location.reload();
+            }
+        });
 
+    }
+}
+
+function checkIfPostsExist()
+{
+    const div_class = document.querySelector(".p_container.personal_activity");
+    if (div_class === null)
+    {
+        return;
+    }
+    const length = div_class.children.length;
+    if (length === 0)
+    {
+        div_class.style.display = "none";
+    }
+}
+
+function editBio()
+{
+    const editBioInput = document.querySelector('.bio.disapear');
+    const editBioButton = document.querySelector('.edit');
+    editBioInput.classList.remove('disapear');
+    editBioButton.classList.add('disapear');
+}
+
+function Bio()
+{
+    const bio = document.getElementById('bioinput').value;
+
+    fetch('/bio', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({bio: bio}),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data['success'] === true)
+        {
+            const bio = document.getElementById('bio');
+            bio.innerHTML = data['bio'];
+            const editBioInput = document.querySelector('.bio');
+            const editBioButton = document.querySelector('.edit.disapear');
+            editBioInput.classList.add('disapear');
+            editBioButton.classList.remove('disapear');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+
+}
+
+document.addEventListener('DOMContentLoaded',initializeAllLikeStatus);
+document.addEventListener('DOMContentLoaded',checkIfPostsExist);
 // Initialize like status when the page is fully loaded or reloaded
 window.addEventListener('load', initializeAllLikeStatus);
+window.addEventListener('load', checkIfPostsExist);
