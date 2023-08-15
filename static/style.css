@@ -388,6 +388,14 @@ a:hover
     gap: 10px;
 }
 
+.exploreget
+{
+    display: block;
+    margin: 40px auto;
+    text-align: center;
+    justify-content: center;
+}
+
 .p_container 
 {
     padding: 15px;
@@ -442,6 +450,13 @@ a:hover
     {
         display: block;
     }
+
+    .explore
+    {
+        display: flex;
+        gap: 10px;
+        text-align: center;
+    }
 }
 
 .post_header
@@ -492,9 +507,63 @@ a:hover
 {
     display: block;
     text-align: center;
+    cursor: pointer;
 }
 
 .strip
 {
+    text-align: center;
+    justify-content: center;
+}
+
+#friend_pic
+{
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+}
+
+.friend
+{
+    display: flex;
+    justify-content: space-between;
+}
+
+.friend_details
+{
+    display: flex;
+    gap: 13px;
+}
+
+#friend_name
+{
+    margin-top: -5px;
+}
+
+#friend_class
+{
+    margin-top: -13px;
+    font-weight: 400;
+}
+
+.exploreget
+{
+    padding-bottom: 0;
+}
+
+hr {
+    color: black;
+    background-color: #c04040;
+    height: 2px; 
+}
+
+.button
+{
+    border-radius: 10px;
+    padding: 10px;
+    width: 100px;
+    max-height: 40px;
+    background-color: #c04040;
+    justify-content: center;
     text-align: center;
 }

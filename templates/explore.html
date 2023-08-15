@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Explore
+{% endblock %}
+
+{% block main %}
+    <div class="container exploreget">
+        <div>
+            <p><strong>Expand your perimeter by Circling In</strong></p>
+        </div>
+        <hr>
+        {% for user in users %}
+            <div class="friend">
+                <div class="friend_details">
+                    <div class="friend_picture">
+                        <img src="/{{user['path']}}" alt="profile picture" id="friend_pic">
+                    </div>
+                    <div class="friend_name">
+                        <p id="friend_name"><a href="/users/{{user['username']}}">{{user['name']}}</a></p>
+                        <p id="friend_class">{{user['class']}} {{user['major']}}</p>
+                    </div>
+                </div>
+                <div class="circle_in">
+                    <button class="button">Circle In</button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

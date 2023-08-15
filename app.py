@@ -538,3 +538,31 @@ def bio():
     userId = session['user_id']
     db.execute('UPDATE user SET bio = ? WHERE id = ?', bio, userId)
     return jsonify({"success": True, "bio":bio})
+
+@app.route('/explore')
+@login_required
+def explore():
+
+    users = get_users()
+    username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
+    return render_template('explore.html', users = users, username = username)
+
+def get_users():
+
+    rows = db.execute("SELECT * FROM user")
+    users = []
+
+    for row in rows:
+
+        fullname = row['name']
+        username = row['username']
+        picId = row['pictureId']
+        path = id_path(picId)
+        major = row['major']
+        major = major_format(major)
+        clas =  row['yearorposition']
+        clas = f"C'{clas[2:]}"
+        user_dict = {"name": fullname, "path":path, "major":major, "class": clas, "username":username}
+        users.append(user_dict)
+    
+    return users

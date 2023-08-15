@@ -373,6 +373,11 @@ function redirectOption(selectElement)
     }
 }
 
+function explore()
+{
+    window.location.href = '/explore';
+}
+
 document.addEventListener('DOMContentLoaded',initializeAllLikeStatus);
 document.addEventListener('DOMContentLoaded',checkIfPostsExist);
 // Initialize like status when the page is fully loaded or reloaded
