@@ -481,6 +481,7 @@ def search():
 def user(username):
     
     userId = db.execute("SELECT id FROM user WHERE username = ?", username)[0]['id']
+
     bio = db.execute("SELECT bio FROM user WHERE id = ?", userId)[0]['bio'] if not None else ''
     rows = db.execute("SELECT * FROM post WHERE userId = ?", userId)
     length = len(rows)
@@ -510,7 +511,11 @@ def user(username):
         
     posts.reverse()
 
-    return render_template("profile.html", image = path, username = username, fullname = fullname, classgroup = classgroup, major = major, date = date, perimeter = perimeter, posts = posts, bio = bio)
+    if userId == session['user_id']:
+        return render_template("profile.html", image = path, username = username, fullname = fullname, classgroup = classgroup, major = major, date = date, perimeter = perimeter, posts = posts, bio = bio)
+    else:
+        return render_template("otherprofile.html", image = path, username = username, fullname = fullname, classgroup = classgroup, major = major, date = date, perimeter = perimeter, posts = posts, bio = bio)
+
 
 @app.route("/deletepost/<post_id>", methods=["POST"])
 @login_required

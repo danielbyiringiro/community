@@ -39,15 +39,22 @@
                                 <input autocomplete="off" class="form-control me-2 search-input search-icon" type="search" placeholder="Search..." aria-label="Search" name="query" onkeydown="searchquery()" required>
                             </div>
                         </ul>
-                        <ul class="navbar-nav ms-auto mt-2">
+                        <ul class="navbar-nav ms-auto mt-2 strip">
+                            <li class="nav-item">
+                                <a class="nav-link explore" href="/explore" >
+                                    <img class="explorepic" src="/static/explore.png" alt="Explore">
+                                </a>
+                            </li>
                             <select name="options" class="search-form nav-end end" onchange="redirectOption(this)">
                                 <option>{{username}}</option>
                                 <option value="/logout">Log Out</option>
                             </select>
                             <script>
-                                function redirectOption(selectElement) {
+                                function redirectOption(selectElement) 
+                                {
                                     var selectedValue = selectElement.value;
-                                    if (selectedValue) {
+                                    if (selectedValue) 
+                                    {
                                         window.location.href = selectedValue;
                                     }
                                 }

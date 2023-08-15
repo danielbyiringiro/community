@@ -26,13 +26,6 @@
                 <p>Perimeter : {{perimeter}}</p>
                 <p>Bio:</p>
                 <p id="bio">{{bio}}</p>
-                <div class="bio disapear">
-                    <div class="mb-3">
-                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="bioinput" name="email" placeholder="Bio" type="text" required>
-                    </div>
-                    <button class="done" onclick="Bio()">Done</button>
-                </div>
-                <button class="edit" onclick="editBio()">Edit Bio</button>
             </div>
         </div>
         <div class="p_container personal_activity">
@@ -41,12 +34,6 @@
                     <div class="post_header">
                         <div>
                             <p class="belowtext">{{post['time']}}</p>
-                        </div>
-                        <div class="dropdown-container">
-                            <img src="/static/3dots.jpg" alt="3dots" class="dots" onclick="toggleDropdown(this)">
-                            <div class="dropdown-content" id="delete_post">
-                                <a onclick="deletePost({{post['post_id']}})">Delete Post</a>
-                            </div>
                         </div>
                     </div>
                     <div class="post-content" id="postContent">

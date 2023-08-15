@@ -364,6 +364,15 @@ function Bio()
 
 }
 
+function redirectOption(selectElement) 
+{
+    var selectedValue = selectElement.value;
+    if (selectedValue) 
+    {
+        window.location.href = selectedValue;
+    }
+}
+
 document.addEventListener('DOMContentLoaded',initializeAllLikeStatus);
 document.addEventListener('DOMContentLoaded',checkIfPostsExist);
 // Initialize like status when the page is fully loaded or reloaded

@@ -482,3 +482,19 @@ a:hover
     border-radius: 10px;
     color: #c04040;
 }
+
+.explorepic
+{
+    height: 25px;
+}
+
+.explore
+{
+    display: block;
+    text-align: center;
+}
+
+.strip
+{
+    text-align: center;
+}
