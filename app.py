@@ -91,7 +91,7 @@ def login():
     if request.method == "POST":
 
         # Ensure username was submitted
-        if not request.form.get("email"):
+        if not request.form.get("username"):
             flash("Empty email")
             return redirect("/login")
 
@@ -101,11 +101,11 @@ def login():
             return redirect("/login")
 
         # Query database for username
-        rows = db.execute("SELECT * FROM user WHERE email = ?", request.form.get("email"))
+        rows = db.execute("SELECT * FROM user WHERE username = ?", request.form.get("username"))
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            flash("Email or password is wrong")
+            flash("Username or Password is wrong")
             return redirect("/login")
 
         # Remember which user has logged in
