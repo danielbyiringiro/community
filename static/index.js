@@ -378,6 +378,46 @@ function explore()
     window.location.href = '/explore';
 }
 
+function circle(id)
+{
+    fetch('/circle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({id: id}),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data['success'] === true)
+        {
+            const friend = document.getElementById(id);
+            friend.style.display = "none";
+        }
+    });
+}
+
+function approve(id)
+{
+    fetch('/approve', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({id: id}),
+    })
+    .then(res => res.json())
+    .then(data => {
+        
+        if (data['success'] === true)
+        {
+            const friend = document.getElementById(id);
+            friend.style.display = "none";
+        }
+    });
+}
+
+
 document.addEventListener('DOMContentLoaded',initializeAllLikeStatus);
 document.addEventListener('DOMContentLoaded',checkIfPostsExist);
 // Initialize like status when the page is fully loaded or reloaded

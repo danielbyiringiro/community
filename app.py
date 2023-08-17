@@ -543,26 +543,113 @@ def bio():
 @login_required
 def explore():
 
-    users = get_users()
+    circle_requests = get_circle_requests()
+    suggestions = get_suggestions()
     username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
-    return render_template('explore.html', users = users, username = username)
+    return render_template('explore.html', circle_requests = circle_requests, username = username, suggestions = suggestions)
 
-def get_users():
+def get_circle_requests():
 
-    rows = db.execute("SELECT * FROM user")
-    users = []
+    userId = session['user_id']
+    user_list = circle_requests(userId)
 
-    for row in rows:
+    if len(user_list) > 0:
 
-        fullname = row['name']
-        username = row['username']
-        picId = row['pictureId']
-        path = id_path(picId)
-        major = row['major']
-        major = major_format(major)
-        clas =  row['yearorposition']
-        clas = f"C'{clas[2:]}"
-        user_dict = {"name": fullname, "path":path, "major":major, "class": clas, "username":username}
-        users.append(user_dict)
+        users = []
+
+        for row in user_list:
+
+            userId = row['id']
+            fullname = row['name']
+            username = row['username']
+            picId = row['pictureId']
+            path = id_path(picId)
+            major = row['major']
+            major = major_format(major)
+            clas =  row['yearorposition']
+            clas = f"C'{clas[2:]}"
+            user_dict = {"name": fullname, "path":path, "major":major, "class": clas, "username":username, "id":userId}
+            users.append(user_dict)
+        
+        return users
     
-    return users
+    else:
+
+        return []
+
+def get_suggestions():
+
+    userId = session['user_id']
+    rows = db.execute("SELECT id FROM user")
+    valid_ids = [str(x['id']) for x in rows if not circle_exists(userId, x['id']) if x['id'] != userId]
+    
+    if valid_ids:
+        string = ",".join(valid_ids)
+        query = f"SELECT * FROM user WHERE id IN ({string})"
+        user_rows = db.execute(query)
+        users = []
+
+        for row in user_rows:
+
+            userId = row['id']
+            fullname = row['name']
+            username = row['username']
+            picId = row['pictureId']
+            path = id_path(picId)
+            major = row['major']
+            major = major_format(major)
+            clas =  row['yearorposition']
+            clas = f"C'{clas[2:]}"
+            user_dict = {"name": fullname, "path":path, "major":major, "class": clas, "username":username, "id":userId}
+            users.append(user_dict)
+        
+        return users
+    
+    else:
+        return []
+
+@app.route('/circle', methods =["POST"])
+@login_required
+def circle():
+
+    friend_id = request.get_json()['id']
+    user_id = session['user_id']
+
+    if not circle_exists(user_id, friend_id):
+        db.execute("INSERT INTO circle(user_id, friend_id, status) VALUES(?,?,'PENDING')", user_id, friend_id)
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False})
+
+@app.route('/approve', methods =["POST"])
+@login_required
+def approve():
+
+    friend_id = request.get_json()['id']
+    user_id = session['user_id']
+
+    print(f"Circle Exists : {circle_exists(user_id, friend_id)}")
+
+    if circle_exists(user_id, friend_id):
+        db.execute("UPDATE circle SET status = 'APPROVE' WHERE user_id = ? and friend_id = ?", friend_id, user_id)
+        return jsonify({"success": True})
+    
+    else:
+
+        return jsonify({"success": False})
+    
+def circle_exists(user_id, friend_id):
+
+    request = db.execute("SELECT * FROM circle WHERE user_id = ? and friend_id = ?", user_id, friend_id)
+    receive = db.execute("SELECT * FROM circle WHERE user_id = ? and friend_id = ?", friend_id, user_id)
+
+    return len(request) > 0 or len(receive) > 0
+
+def circle_requests(user_id):
+
+    receive = db.execute("SELECT user_id FROM circle WHERE friend_id = ? and status = 'PENDING'",  user_id)
+    id = [str(x['user_id']) for x in receive]
+    query_string = ','.join(id)
+    query = f"SELECT * FROM user WHERE id in ({query_string})"
+    rows = db.execute(query)
+    return rows

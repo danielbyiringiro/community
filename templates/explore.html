@@ -9,9 +9,10 @@
         <div>
             <p><strong>Expand your perimeter by Circling In</strong></p>
         </div>
+        <p style="text-align: left;">Extension Requests</p>
         <hr>
-        {% for user in users %}
-            <div class="friend">
+        {% for user in circle_requests %}
+            <div class="friend" id="{{user['id']}}">
                 <div class="friend_details">
                     <div class="friend_picture">
                         <img src="/{{user['path']}}" alt="profile picture" id="friend_pic">
@@ -22,7 +23,25 @@
                     </div>
                 </div>
                 <div class="circle_in">
-                    <button class="button">Circle In</button>
+                    <button class="button" onclick="approve({{user['id']}})">Approve</button>
+                </div>
+            </div>
+        {% endfor %}
+        <p style="text-align: left;">Suggestions</p>
+        <hr>
+        {% for user in suggestions %}
+            <div class="friend" id="{{user['id']}}">
+                <div class="friend_details">
+                    <div class="friend_picture">
+                        <img src="/{{user['path']}}" alt="profile picture" id="friend_pic">
+                    </div>
+                    <div class="friend_name">
+                        <p id="friend_name"><a href="/users/{{user['username']}}">{{user['name']}}</a></p>
+                        <p id="friend_class">{{user['class']}} {{user['major']}}</p>
+                    </div>
+                </div>
+                <div class="circle_in">
+                    <button class="button" onclick="circle({{user['id']}})">Circle In</button>
                 </div>
             </div>
         {% endfor %}
