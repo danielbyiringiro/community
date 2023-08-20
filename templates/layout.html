@@ -68,13 +68,6 @@
                 <input autocomplete="off" class="form-control me-2 search-input search-icon" type="search" placeholder="Search..." aria-label="Search" name="query" oninput="searchQuery()" required>
             </div>
             <div id="search-results"></div>
-            {% if get_flashed_messages() %}
-                <header>
-                    <div class="alert alert-primary mb-0 text-center" role="alert">
-                        {{ get_flashed_messages() | join(" ") }}
-                    </div>
-                </header>
-            {% endif %}
             <main class="container-fluid py-5 text-center top">
                 {% block main %}{% endblock %}
             </main>

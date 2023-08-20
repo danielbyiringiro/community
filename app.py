@@ -118,91 +118,87 @@ def login():
 
         return render_template("login.html")
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route("/register", methods=["GET"])
 def register():
 
     if request.method == "GET":
         statuses = ["Student", "Alumni", "Staff"]
         return render_template("register.html", statuses = statuses)
     
-    if request.method == "POST":
 
-        name = request.form.get("name")
-        username = request.form.get("username")
-        email = request.form.get("email")
-        status = request.form.get("status")
-        
-        image_file = request.files.get("image")
-        
-        location = "profile_pic"
-        response = picture_handler(image_file, location)
+@app.route('/registerj', methods = ['POST'])
+def registerj():
 
-        if response != False:
-            image_id = response
-        
-        else:
-            flash("Image file is not uploaded or is not supported")
-            return redirect("/register")
+    name = request.get_json()['name']
+    username = request.get_json()['username']
+    email = request.get_json()['email']
+    status = request.get_json()['status']
+    
+    statuses_lower = ["student", "alumni", "staff"]
 
+    if exists_user(username):
+        return jsonify({'success': False, 'message': 'Username already in use'}), 409
+    if exists_email(email):
+        return jsonify({'success': False, 'message': 'Email already in use'}), 409
+    if status.lower() not in statuses_lower:
+        return jsonify({'success': False, 'message': 'Invalid status'}), 409
+    
+    return jsonify({'success': True}), 200
 
-        if not name:
-            flash("Provide your name")
-            cleanfile(image_id)
+@app.route("/upload", methods=["POST"])
+def upload():
 
-            return redirect("/register")
-        
-        if not username:
-            flash("Provide your username")
-            cleanfile(image_id)
+    picture = request.files.get("profile_picture")
+    location = "profile_pic"
+    response = picture_handler(picture, location)
 
-            return redirect("/register")
-        
-        if not email:
-            flash("Provide your email")
-            cleanfile(image_id)
+    if response != False:
+    
+        return jsonify({'success': True, 'image_id': response}), 200
+    
+    else:
 
-            return redirect("/register")
-        
-        if not status:
-            flash("Select your status")
-            cleanfile(image_id)
+        return jsonify({'success': False, 'message': 'Image file is not uploaded or is not supported'}), 409
+    
+@app.route("/record", methods=["POST"]) 
+def record():
 
-            return redirect("/register")
-        
-        if exists_user(username):
-            flash("Username already in use")
-            cleanfile(image_id)
+    name = request.get_json()['name']
+    username = request.get_json()['username']
+    email = request.get_json()['email']
+    status = request.get_json()['status']
+    profile_picture = request.get_json()['profile_picture']
+    code = generate_code()
+    db.execute("INSERT INTO user (name, username, email, status, pictureId, yearorposition, hash, regnumber) VALUES (?, ?, ?, ?, ?,'','',?)", name, username, email, status, profile_picture, code)
+    user_id = db.execute("SELECT id FROM user WHERE username = ?", username)[0]['id']
+    session["registration_id"] = user_id
+    return jsonify({'success': True, 'email': email, 'code': code}), 200
 
-            return redirect("/register")
-        """
-        domain = email.split("@")[1]
+@app.route("/send_email", methods = ["POST"])
+def send_email():
 
-        if domain != "ashesi.edu.gh":
-            flash("Use your Ashesi email")
-            cleanfile(image_id)
+    email = request.get_json()['email']
+    code = request.get_json()['code']
+    sending_email = os.getenv("MAIL_USERNAME")
+    msg = Message('Authentication Code', sender = sending_email, recipients=[email])
+    msg.body = f"""
+    Hi,
+    
+    Someone tried to sign up for a Community account
+    with {email} as their email 
+    address. If this was you, enter this confirmation code 
+    in the app to complete the process: 
+    
+    Code: {code}
 
-            return redirect("/register")
-        """
+    From,
+    Community
+    """
 
-        if exists_email(email):
-            flash("Email already in use")
-            cleanfile(image_id)
+    thread = Thread(target=send_async_email, args=(app, msg))
+    thread.start()
 
-            return redirect("/register")
-
-        code = generate_code()
-
-        db.execute("INSERT INTO user (name, username, email, status, regnumber, pictureId, yearorposition, hash) VALUES (?, ?, ?, ?, ?, ?, '','')", name, username, email, status, code, image_id)
-        student_id = db.execute("SELECT id FROM user WHERE username = ?", username)[0]["id"]
-        session["registration_id"] = student_id
-        
-        if send_email(email, code) == True:
-            flash("Check registration code from your email ----- [Password must at leat have 8 characters, including a digit, lowercase and uppercase letter]")
-            if status.lower() == "student" or status.lower() == "alumni":
-                return redirect("/year")
-            
-            elif status.lower() == "staff":
-                return redirect("/staff")
+    return jsonify({"success": True, "message": "Check the code sent to your mail."}), 200
 
 @app.route("/year", methods = ["GET", "POST"])
 @registration_required
@@ -318,27 +314,7 @@ def send_async_email(app, msg):
     with app.app_context():
         mail.send(msg)
 
-def send_email(email, code):
-    sending_email = os.getenv("MAIL_USERNAME")
-    msg = Message('Authentication Code', sender = sending_email, recipients=[email])
-    msg.body = f"""
-    Hi,
-    
-    Someone tried to sign up for a Community account
-    with {email} as their email 
-    address. If this was you, enter this confirmation code 
-    in the app to complete the process: 
-    
-    Code: {code}
 
-    From,
-    Community
-    """
-
-    thread = Thread(target=send_async_email, args=(app, msg))
-    thread.start()
-
-    return True
 
 @app.route("/liked/<post_id>", methods=["POST"])
 @login_required
@@ -653,3 +629,27 @@ def circle_requests(user_id):
     query = f"SELECT * FROM user WHERE id in ({query_string})"
     rows = db.execute(query)
     return rows
+
+@app.route('/checkuser', methods = ["POST"])
+def checkUsername():
+
+    username = request.get_json()['username']
+    if exists_user(username):
+
+        return jsonify({"success": False, "message": f"Username '{username}' already in use"})
+    
+    else:
+
+        return jsonify({"success": True})
+
+@app.route('/checkemail', methods = ["POST"])
+def checkEmail():
+    
+    email = request.get_json()['email']
+    if exists_email(email):
+
+        return jsonify({"success": False, "message": f"Email '{email}' already in use"})
+    
+    else:
+
+        return jsonify({"success": True})

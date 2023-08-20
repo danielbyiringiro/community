@@ -417,9 +417,256 @@ function approve(id)
     });
 }
 
+function checkusername()
+{
+    const usernameInput = document.getElementById('username_register');
+    const username = usernameInput.value;
+
+    fetch('/checkuser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({username: username}),
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data['success'] === false)
+        {
+            showAndHideAlert(data['message'], 3000);
+            usernameInput.focus();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function checkemail()
+{
+    const emailInput = document.getElementById('email');
+    const email = emailInput.value;
+
+    fetch('/checkemail', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({email: email}),
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data['success'] === false)
+        {
+            showAndHideAlert(data['message'], 3000);
+            emailInput.focus();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function showAndHideAlert(message, timeout) 
+{
+    const alertElement = document.querySelector(".alert_register");
+    alertElement.textContent = message;
+    alertElement.style.display = "block";
+
+
+    setTimeout(function () 
+    {
+        alertElement.style.display = "none";
+    }, timeout);
+}
+
+
+function register()
+{
+    const username = document.getElementById('username_register').value;
+    const email = document.getElementById('email').value;
+    const name = document.getElementById('name').value;
+    const status = document.getElementById('status').value;
+    const profile_picture = document.getElementById('image_register').files[0];
+    
+
+    const formData = new FormData();
+    formData.append('profile_picture', profile_picture);
+    
+    if (username === "" || email === "" || name === "" || status === "" || profile_picture === "")
+    {
+        showAndHideAlert("Please fill all the fields", 3000);
+        return;
+    }
+
+    const user_details = 
+    {
+        username: username,
+        email: email,
+        name: name,
+        status: status,
+    }
+
+    fetch('/registerj', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user_details),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data['success'] === true)
+        {
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data['success'] === true)
+                {
+                    user_details['profile_picture'] = data['image_id'];
+                    console.log(user_details);
+                    fetch('/record', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(user_details),
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data['success'] === true)
+                        {
+                            const email_details =
+                            {
+                                email: data['email'],
+                                code : data['code'],
+
+                            };
+
+                            fetch('/send_email', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(email_details),
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data['success'] === true)
+                                {
+                                    window.location.href = '/year';
+                                }
+                            })
+                            
+                        }
+                        else
+                        {
+                            showAndHideAlert(data['message'], 3000);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+                else
+                {
+                    showAndHideAlert(data['message'], 3000);
+                }
+            }
+            )
+            .catch(error => console.error('Error:', error));
+
+        }
+        else
+        {
+            showAndHideAlert(data['message'], 3000);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+
+}
+
+function passwordAlert()
+{
+    showAndHideAlertYear("Password has to be at least 8 characters long including a number, uppercase and lowercase key", 4000);
+}
+
+function passwordAnalyse()
+{
+    const passwordInput = document.getElementById('password');
+    const password = passwordInput.value;
+
+    if (password.length < 8)
+    {
+        showAndHideAlertYear('Password has to be at least 8 characters long', 2000);
+        passwordInput.focus();
+
+    }
+
+    else if (!hasLowerCase(password))
+    {
+        showAndHideAlertYear('Password has to contain at least one lowercase letter', 2000);
+        passwordInput.focus();
+    }
+
+    else if (!hasUpperCase(password))
+    {
+        showAndHideAlertYear('Password has to contain at least one uppercase letter', 2000);
+        passwordInput.focus();
+    }
+
+    else if (!hasDigit(password))
+    {
+        showAndHideAlertYear('Password has to contain at least one number', 2000);
+        passwordInput.focus();
+    }
+}
+
+function hasLowerCase(str) {
+    return /[a-z]/.test(str);
+}
+
+function hasUpperCase(str) {
+    return /[A-Z]/.test(str);
+}
+
+function hasDigit(str) {
+    return /\d/.test(str);
+}
+
+function passwordCompare()
+{
+    const password = document.getElementById('password').value;
+    const confirmInput = document.getElementById('confirm');
+    const confirm = confirmInput.value;
+
+    if (password !== confirm)
+    {
+        showAndHideAlertYear("Passwords do not mach", 2000);
+    }
+}
+
+function showAndHideAlertYear(message, timeout) 
+{
+    const alertElement = document.querySelector(".alert_year");
+    alertElement.textContent = message;
+    alertElement.style.display = "block";
+
+    setTimeout(function () 
+    {
+        alertElement.style.display = "none";
+    }, timeout);
+}
 
 document.addEventListener('DOMContentLoaded',initializeAllLikeStatus);
 document.addEventListener('DOMContentLoaded',checkIfPostsExist);
-// Initialize like status when the page is fully loaded or reloaded
+
 window.addEventListener('load', initializeAllLikeStatus);
 window.addEventListener('load', checkIfPostsExist);
+
+document.addEventListener('DOMContentLoaded', () => {
+    const currentPath = window.location.pathname;
+    if (currentPath.endsWith('year')) 
+    { 
+        showAndHideAlertYear("Check the code in your email", 4000);
+    }
+});
