@@ -1,13 +1,22 @@
+def validate_password(password, confirmation):
 
-def time_format(created_at):
+    
+    if password != confirmation: 
+        return "Passwords do not match"
+    
+    if len(password) < 8:
+        return "Password must be at least 8 characters"
+    
+    if not any(char.isdigit() for char in password):
+        return "Password must contain at least one number"
+    
+    if not any(char.isupper() for char in password):
+        return "Password must contain at least one uppercase letter"
+    
+    if not any(char.islower() for char in password):
+        return "Password must contain at least one lowercase letter"
 
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    day, time = created_at.split()
-    hours, minutes, seconds = time.split(':')
-    time = f"{hours}:{minutes}"
-    year, month, day = day.split('-')
-    month = months[int(month)-1]
-    day = int(day)
-    date_format = f"{time} {day} {month}"
-    return date_format
+    return True
+    
 
+print(validate_password("december1","december1"))

@@ -657,6 +657,139 @@ function showAndHideAlertYear(message, timeout)
     }, timeout);
 }
 
+function codeCompare(regId)
+{
+    const codeInput = document.getElementById('code');
+    const code = codeInput.value;
+
+    fetch('/code_compare', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({code: code, regId: regId}),
+    })
+    .then(res => res.json())
+    .then(data => {
+    if (data['success'] === false)
+        {
+            showAndHideAlertYear(data['message'], 3000);
+            codeInput.focus();
+        }
+    });
+}
+
+function year(regId)
+{
+    const code = document.getElementById('code').value;
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm').value;
+    const major = document.getElementById('major').value;
+    const year = document.getElementById('class').value;
+
+    if (code === '' || password === '' || confirm === '' || major === '' || year === '' || regId === '')
+    {
+        showAndHideAlertYear("Please fill in all the fields", 3000);
+        return;
+    }
+
+    const user_details =
+    {
+        code: code,
+        password: password,
+        confirm: confirm,
+        major: major,
+        year: year,
+        id: regId,
+    };
+
+    fetch('/yearpost', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user_details),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data['success'] === true)
+        {
+            window.location.href = '/';
+        }
+        else
+        {
+            showAndHideAlertYear(data['message'], 3000);
+        }
+    })
+}
+
+function loginUsername()
+{
+    const usernameInput = document.getElementById('loginusername');
+    const usename = usernameInput.value;
+
+    if (usename === '')
+    {
+        showAndHideAlertYear("Please enter your username", 3000);
+        usernameInput.focus();
+        return;
+    }
+
+    fetch('/login_username', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({username: usename}),
+    })
+    .then(res => res.json())
+    .then(data => {data['success'] === false
+        if (data['success'] === false)
+        {
+            showAndHideAlertYear(data['message'], 3000);
+            usernameInput.focus();
+        }
+    });
+}
+
+function loginall()
+{
+    const username = document.getElementById('loginusername').value;
+    const passwordInput = document.getElementById('loginpassword');
+    const password = passwordInput.value;
+
+    if (password === '')
+    {
+        showAndHideAlertYear("Please fill in your password", 3000);
+        passwordInput.focus();
+        return;
+    }
+
+    const user_details =
+    {
+        username: username,
+        password: password,
+    };
+
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user_details),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data['success'] === true)
+        {
+            window.location.href = '/';
+        }
+        else
+        {
+            showAndHideAlertYear(data['message'], 3000);
+        }
+    })
+}
 
 document.addEventListener('DOMContentLoaded',initializeAllLikeStatus);
 document.addEventListener('DOMContentLoaded',checkIfPostsExist);

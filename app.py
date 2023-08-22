@@ -79,40 +79,35 @@ def index():
         posts.reverse()
 
         return render_template("index.html", username = username, image = picture_path, posts = posts)
-    
+
+
+@app.route("/login_username", methods=["POST"])
+def login_username():
+    username = request.get_json()['username']
+    rows = db.execute("SELECT * FROM user WHERE username = ?", username)
+    if len(rows) == 0:
+        return jsonify({"success": False, "message": "Username not found"})
+    else:
+        return jsonify({"success": True})
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
-    
-    # Forget any user_id
     session.clear()
 
-    # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
+        
+        username = request.get_json()['username']
+        password = request.get_json()['password']
 
-        # Ensure username was submitted
-        if not request.form.get("username"):
-            flash("Empty email")
-            return redirect("/login")
+        rows = db.execute("SELECT * FROM user WHERE username = ?", username)
 
-        # Ensure password was submitted
-        elif not request.form.get("password"):
-            flash("Empty password")
-            return redirect("/login")
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
+            return jsonify({"success": False, "message": "Username and Password do not match"})
 
-        # Query database for username
-        rows = db.execute("SELECT * FROM user WHERE username = ?", request.form.get("username"))
-
-        # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            flash("Username or Password is wrong")
-            return redirect("/login")
-
-        # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
-        # Redirect user to home page
-        return redirect("/")
+        return jsonify({"success": True})
     
     else:
 
@@ -129,7 +124,6 @@ def register():
 @app.route('/registerj', methods = ['POST'])
 def registerj():
 
-    name = request.get_json()['name']
     username = request.get_json()['username']
     email = request.get_json()['email']
     status = request.get_json()['status']
@@ -204,42 +198,43 @@ def send_email():
 @registration_required
 def year():
 
-    if request.method == "GET":
+    years = list(range(2002,2028))
+    years.reverse()
+    majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
+    return render_template("year.html", id = session["registration_id"], years = years, majors = majors)
 
-        years = list(range(2002,2028))
-        years.reverse()
-        majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
-        return render_template("year.html", id = session["registration_id"], years = years, majors = majors)
+@app.route("/yearpost", methods = ["POST"])
+def yearpost():
+    print(request.get_json())
+    year = request.get_json()['year']
+    major = request.get_json()['major']
+    id = request.get_json()['id']
+    password = request.get_json()['password']
+    confirm = request.get_json()['confirm']
+    code = request.get_json()['code']
+    majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
     
-    if request.method == "POST":
+    if int(year) < 2002 or int(year) > 2027:
+        return jsonify({"success": False, "message": "Invalid Graduation Year"})
+    
+    if major not in majors:
+        return jsonify({"success": False, "message": "Invalid Major"})
+    
+    userCode = db.execute("SELECT regnumber FROM user WHERE id = ?", id)[0]["regnumber"]
 
-        year = request.form.get("class")
-        major = request.form.get("major")
-        password = request.form.get("password")
-        confirmation = request.form.get("confirm")
-        code = request.form.get("code")
-        id = request.form.get("id")
-        
-        
-        if not year or int(year) < 2002 or int(year) > 2027:
-            flash("Select your graduation year")
-            return redirect("/year")
-        
-        userCode = db.execute("SELECT regnumber FROM user WHERE id = ?", id)
-        userCode = userCode[0]["regnumber"]
+    if code != userCode:
+        return jsonify({"success": False, "message": "Invalid code"})
+    
+    message = validate_password(password, confirm)
+    if message == True:
 
-        #print(f"Code: {code}, User Code: {userCode}")
-        if not code or code != userCode:
-            flash("Invalid code")
-            return redirect("/year")
-        
-        message = validate_password(password, confirmation)
-        
+        session["user_id"] = id
+        db.execute("UPDATE user SET yearorposition = ?, major = ?, hash = ? WHERE id = ?", year, major, generate_password_hash(password), id)
+        return jsonify({"success": True})
+    
+    else:
+        return jsonify({"success": False, "message": message})
 
-        if message == True:
-            session["user_id"] = id
-            db.execute("UPDATE user SET yearorposition = ?, major = ?, hash = ? WHERE id = ?", year, major, generate_password_hash(password), id)
-            return redirect("/")
 
 @app.route("/logout")
 def logout():
@@ -296,6 +291,7 @@ def user_details():
 def user_profile(username):
 
     fullname = db.execute("SELECT name FROM user WHERE username = ?", username)[0]['name']
+    userId = db.execute("SELECT id FROM user WHERE username = ?", username)[0]['id']
     image_id = db.execute("SELECT pictureId FROM user WHERE username = ?", username)[0]['pictureId']
     path = id_path(image_id)
     classgroup = db.execute("SELECT yearorposition FROM user WHERE username = ?", username)[0]['yearorposition']
@@ -305,7 +301,8 @@ def user_profile(username):
     date = time_format(date)
     date = date.split()
     date = f"{date[1]} {date[2]}"
-    perimeter = 0
+    perimeter = db.execute("SELECT * FROM circle WHERE user_id = ? or friend_id = ? and status = 'APPROVE'", userId, userId)
+    perimeter = len(perimeter)
 
     return fullname, path, classgroup, major, date, perimeter
 
@@ -604,8 +601,6 @@ def approve():
     friend_id = request.get_json()['id']
     user_id = session['user_id']
 
-    print(f"Circle Exists : {circle_exists(user_id, friend_id)}")
-
     if circle_exists(user_id, friend_id):
         db.execute("UPDATE circle SET status = 'APPROVE' WHERE user_id = ? and friend_id = ?", friend_id, user_id)
         return jsonify({"success": True})
@@ -653,3 +648,18 @@ def checkEmail():
     else:
 
         return jsonify({"success": True})
+
+@app.route('/code_compare', methods = ["POST"])
+def code_compare():
+
+    code = request.get_json()['code']
+    regId = request.get_json()['regId']
+
+    codeDB = db.execute("SELECT regnumber FROM user WHERE id = ?", regId)[0]['regnumber']
+    if code == codeDB:
+
+        return jsonify({"success": True})
+    
+    else:
+
+        return jsonify({"success": False, "message": "Code does not match with code sent to your email"})
