@@ -13,15 +13,16 @@
 {% endblock %}
 
 {% block main %}
+<div id="alert" class="alert_year"></div>
 <div class="login">
-    <form action="/login" method="post">
+    <div>
         <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text" required>
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="loginusername" onblur="loginUsername()" name="username" placeholder="Username" type="text" required>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password" required>
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="loginpassword" name="password" placeholder="Password" type="password" required>
         </div>
-        <button class="btn btn-primary" type="submit">Log In</button>
-    </form>
+        <button class="btn btn-primary" onclick="loginall()">Log In</button>
+    </div>
 </div>
 {% endblock %}

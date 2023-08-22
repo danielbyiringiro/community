@@ -79,171 +79,162 @@ def index():
         posts.reverse()
 
         return render_template("index.html", username = username, image = picture_path, posts = posts)
-    
+
+
+@app.route("/login_username", methods=["POST"])
+def login_username():
+    username = request.get_json()['username']
+    rows = db.execute("SELECT * FROM user WHERE username = ?", username)
+    if len(rows) == 0:
+        return jsonify({"success": False, "message": "Username not found"})
+    else:
+        return jsonify({"success": True})
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
-    
-    # Forget any user_id
     session.clear()
 
-    # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
+        
+        username = request.get_json()['username']
+        password = request.get_json()['password']
 
-        # Ensure username was submitted
-        if not request.form.get("username"):
-            flash("Empty email")
-            return redirect("/login")
+        rows = db.execute("SELECT * FROM user WHERE username = ?", username)
 
-        # Ensure password was submitted
-        elif not request.form.get("password"):
-            flash("Empty password")
-            return redirect("/login")
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
+            return jsonify({"success": False, "message": "Username and Password do not match"})
 
-        # Query database for username
-        rows = db.execute("SELECT * FROM user WHERE username = ?", request.form.get("username"))
-
-        # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            flash("Username or Password is wrong")
-            return redirect("/login")
-
-        # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
-        # Redirect user to home page
-        return redirect("/")
+        return jsonify({"success": True})
     
     else:
 
         return render_template("login.html")
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route("/register", methods=["GET"])
 def register():
 
     if request.method == "GET":
         statuses = ["Student", "Alumni", "Staff"]
         return render_template("register.html", statuses = statuses)
     
-    if request.method == "POST":
 
-        name = request.form.get("name")
-        username = request.form.get("username")
-        email = request.form.get("email")
-        status = request.form.get("status")
-        
-        image_file = request.files.get("image")
-        
-        location = "profile_pic"
-        response = picture_handler(image_file, location)
+@app.route('/registerj', methods = ['POST'])
+def registerj():
 
-        if response != False:
-            image_id = response
-        
-        else:
-            flash("Image file is not uploaded or is not supported")
-            return redirect("/register")
+    username = request.get_json()['username']
+    email = request.get_json()['email']
+    status = request.get_json()['status']
+    
+    statuses_lower = ["student", "alumni", "staff"]
 
+    if exists_user(username):
+        return jsonify({'success': False, 'message': 'Username already in use'}), 409
+    if exists_email(email):
+        return jsonify({'success': False, 'message': 'Email already in use'}), 409
+    if status.lower() not in statuses_lower:
+        return jsonify({'success': False, 'message': 'Invalid status'}), 409
+    
+    return jsonify({'success': True}), 200
 
-        if not name:
-            flash("Provide your name")
-            cleanfile(image_id)
+@app.route("/upload", methods=["POST"])
+def upload():
 
-            return redirect("/register")
-        
-        if not username:
-            flash("Provide your username")
-            cleanfile(image_id)
+    picture = request.files.get("profile_picture")
+    location = "profile_pic"
+    response = picture_handler(picture, location)
 
-            return redirect("/register")
-        
-        if not email:
-            flash("Provide your email")
-            cleanfile(image_id)
+    if response != False:
+    
+        return jsonify({'success': True, 'image_id': response}), 200
+    
+    else:
 
-            return redirect("/register")
-        
-        if not status:
-            flash("Select your status")
-            cleanfile(image_id)
+        return jsonify({'success': False, 'message': 'Image file is not uploaded or is not supported'}), 409
+    
+@app.route("/record", methods=["POST"]) 
+def record():
 
-            return redirect("/register")
-        
-        if exists_user(username):
-            flash("Username already in use")
-            cleanfile(image_id)
+    name = request.get_json()['name']
+    username = request.get_json()['username']
+    email = request.get_json()['email']
+    status = request.get_json()['status']
+    profile_picture = request.get_json()['profile_picture']
+    code = generate_code()
+    db.execute("INSERT INTO user (name, username, email, status, pictureId, yearorposition, hash, regnumber) VALUES (?, ?, ?, ?, ?,'','',?)", name, username, email, status, profile_picture, code)
+    user_id = db.execute("SELECT id FROM user WHERE username = ?", username)[0]['id']
+    session["registration_id"] = user_id
+    return jsonify({'success': True, 'email': email, 'code': code}), 200
 
-            return redirect("/register")
-        """
-        domain = email.split("@")[1]
+@app.route("/send_email", methods = ["POST"])
+def send_email():
 
-        if domain != "ashesi.edu.gh":
-            flash("Use your Ashesi email")
-            cleanfile(image_id)
+    email = request.get_json()['email']
+    code = request.get_json()['code']
+    sending_email = os.getenv("MAIL_USERNAME")
+    msg = Message('Authentication Code', sender = sending_email, recipients=[email])
+    msg.body = f"""
+    Hi,
+    
+    Someone tried to sign up for a Community account
+    with {email} as their email 
+    address. If this was you, enter this confirmation code 
+    in the app to complete the process: 
+    
+    Code: {code}
 
-            return redirect("/register")
-        """
+    From,
+    Community
+    """
 
-        if exists_email(email):
-            flash("Email already in use")
-            cleanfile(image_id)
+    thread = Thread(target=send_async_email, args=(app, msg))
+    thread.start()
 
-            return redirect("/register")
-
-        code = generate_code()
-
-        db.execute("INSERT INTO user (name, username, email, status, regnumber, pictureId, yearorposition, hash) VALUES (?, ?, ?, ?, ?, ?, '','')", name, username, email, status, code, image_id)
-        student_id = db.execute("SELECT id FROM user WHERE username = ?", username)[0]["id"]
-        session["registration_id"] = student_id
-        
-        if send_email(email, code) == True:
-            flash("Check registration code from your email ----- [Password must at leat have 8 characters, including a digit, lowercase and uppercase letter]")
-            if status.lower() == "student" or status.lower() == "alumni":
-                return redirect("/year")
-            
-            elif status.lower() == "staff":
-                return redirect("/staff")
+    return jsonify({"success": True, "message": "Check the code sent to your mail."}), 200
 
 @app.route("/year", methods = ["GET", "POST"])
 @registration_required
 def year():
 
-    if request.method == "GET":
+    years = list(range(2002,2028))
+    years.reverse()
+    majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
+    return render_template("year.html", id = session["registration_id"], years = years, majors = majors)
 
-        years = list(range(2002,2028))
-        years.reverse()
-        majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
-        return render_template("year.html", id = session["registration_id"], years = years, majors = majors)
+@app.route("/yearpost", methods = ["POST"])
+def yearpost():
+    print(request.get_json())
+    year = request.get_json()['year']
+    major = request.get_json()['major']
+    id = request.get_json()['id']
+    password = request.get_json()['password']
+    confirm = request.get_json()['confirm']
+    code = request.get_json()['code']
+    majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
     
-    if request.method == "POST":
+    if int(year) < 2002 or int(year) > 2027:
+        return jsonify({"success": False, "message": "Invalid Graduation Year"})
+    
+    if major not in majors:
+        return jsonify({"success": False, "message": "Invalid Major"})
+    
+    userCode = db.execute("SELECT regnumber FROM user WHERE id = ?", id)[0]["regnumber"]
 
-        year = request.form.get("class")
-        major = request.form.get("major")
-        password = request.form.get("password")
-        confirmation = request.form.get("confirm")
-        code = request.form.get("code")
-        id = request.form.get("id")
-        
-        
-        if not year or int(year) < 2002 or int(year) > 2027:
-            flash("Select your graduation year")
-            return redirect("/year")
-        
-        userCode = db.execute("SELECT regnumber FROM user WHERE id = ?", id)
-        userCode = userCode[0]["regnumber"]
+    if code != userCode:
+        return jsonify({"success": False, "message": "Invalid code"})
+    
+    message = validate_password(password, confirm)
+    if message == True:
 
-        #print(f"Code: {code}, User Code: {userCode}")
-        if not code or code != userCode:
-            flash("Invalid code")
-            return redirect("/year")
-        
-        message = validate_password(password, confirmation)
-        
+        session["user_id"] = id
+        db.execute("UPDATE user SET yearorposition = ?, major = ?, hash = ? WHERE id = ?", year, major, generate_password_hash(password), id)
+        return jsonify({"success": True})
+    
+    else:
+        return jsonify({"success": False, "message": message})
 
-        if message == True:
-            session["user_id"] = id
-            db.execute("UPDATE user SET yearorposition = ?, major = ?, hash = ? WHERE id = ?", year, major, generate_password_hash(password), id)
-            return redirect("/")
 
 @app.route("/logout")
 def logout():
@@ -300,6 +291,7 @@ def user_details():
 def user_profile(username):
 
     fullname = db.execute("SELECT name FROM user WHERE username = ?", username)[0]['name']
+    userId = db.execute("SELECT id FROM user WHERE username = ?", username)[0]['id']
     image_id = db.execute("SELECT pictureId FROM user WHERE username = ?", username)[0]['pictureId']
     path = id_path(image_id)
     classgroup = db.execute("SELECT yearorposition FROM user WHERE username = ?", username)[0]['yearorposition']
@@ -309,7 +301,8 @@ def user_profile(username):
     date = time_format(date)
     date = date.split()
     date = f"{date[1]} {date[2]}"
-    perimeter = 0
+    perimeter = db.execute("SELECT * FROM circle WHERE user_id = ? or friend_id = ? and status = 'APPROVE'", userId, userId)
+    perimeter = len(perimeter)
 
     return fullname, path, classgroup, major, date, perimeter
 
@@ -318,27 +311,7 @@ def send_async_email(app, msg):
     with app.app_context():
         mail.send(msg)
 
-def send_email(email, code):
-    sending_email = os.getenv("MAIL_USERNAME")
-    msg = Message('Authentication Code', sender = sending_email, recipients=[email])
-    msg.body = f"""
-    Hi,
-    
-    Someone tried to sign up for a Community account
-    with {email} as their email 
-    address. If this was you, enter this confirmation code 
-    in the app to complete the process: 
-    
-    Code: {code}
 
-    From,
-    Community
-    """
-
-    thread = Thread(target=send_async_email, args=(app, msg))
-    thread.start()
-
-    return True
 
 @app.route("/liked/<post_id>", methods=["POST"])
 @login_required
@@ -628,8 +601,6 @@ def approve():
     friend_id = request.get_json()['id']
     user_id = session['user_id']
 
-    print(f"Circle Exists : {circle_exists(user_id, friend_id)}")
-
     if circle_exists(user_id, friend_id):
         db.execute("UPDATE circle SET status = 'APPROVE' WHERE user_id = ? and friend_id = ?", friend_id, user_id)
         return jsonify({"success": True})
@@ -653,3 +624,42 @@ def circle_requests(user_id):
     query = f"SELECT * FROM user WHERE id in ({query_string})"
     rows = db.execute(query)
     return rows
+
+@app.route('/checkuser', methods = ["POST"])
+def checkUsername():
+
+    username = request.get_json()['username']
+    if exists_user(username):
+
+        return jsonify({"success": False, "message": f"Username '{username}' already in use"})
+    
+    else:
+
+        return jsonify({"success": True})
+
+@app.route('/checkemail', methods = ["POST"])
+def checkEmail():
+    
+    email = request.get_json()['email']
+    if exists_email(email):
+
+        return jsonify({"success": False, "message": f"Email '{email}' already in use"})
+    
+    else:
+
+        return jsonify({"success": True})
+
+@app.route('/code_compare', methods = ["POST"])
+def code_compare():
+
+    code = request.get_json()['code']
+    regId = request.get_json()['regId']
+
+    codeDB = db.execute("SELECT regnumber FROM user WHERE id = ?", regId)[0]['regnumber']
+    if code == codeDB:
+
+        return jsonify({"success": True})
+    
+    else:
+
+        return jsonify({"success": False, "message": "Code does not match with code sent to your email"})

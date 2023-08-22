@@ -13,44 +13,58 @@
 {% endblock %}
 
 {% block main %}
+<div id="alert" class="alert_register"></div>
 <div class="register">
-    <form action="/register" method="post" enctype="multipart/form-data">
+    <div>
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="name" name="name" placeholder="Name" type="text" required>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text" required>
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="username_register" name="username" placeholder="Username" type="text" onblur="checkusername()" required>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto" id="email" name="email" placeholder="Email (use your ashesi email)" type="text" required>
+            <input autocomplete="off" class="form-control mx-auto w-auto" id="email" name="email" placeholder="Email" type="text" onblur="checkemail()" required>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto small-input" id="image" name="image" type="file" required>
-            <label for="image" id="uploadLabel" class="btn btn-secondary" style="width: 275px; color: gray; background-color: white;">Profile Picture</label>
-            <script>
-                // If you want to handle the selected file and display its name, you can use this JavaScript code.
-                const fileInput = document.getElementById('image');
-                const uploadLabel = document.getElementById('uploadLabel');
-              
-                fileInput.addEventListener('change', () => {
-                  const files = fileInput.files;
-                  if (files.length > 0) {
-                    uploadLabel.textContent = 'Image Uploaded';
-                  } else {
-                    uploadLabel.textContent = 'Upload Image';
-                  }
-                });
-            </script>
+            <input autocomplete="off" class="form-control mx-auto w-auto small-input" id="image_register" name="image" type="file" required>
+            <label for="image_register" id="uploadLabel" class="btn btn-secondary" style="width: 275px; color: gray; background-color: white;">Profile Picture</label>
+            <div id="div_register" style="display: none;">
+                <p>Profile Preview</p>
+                <div><img id="profile_img" src="" class="horizontal-image" alt="preview" style="margin-bottom: 5px;"></div>
+                <div><button id ="okay" class="btn btn-secondary" type="button" style="margin-bottom: 5px;">Okay</button></div>
+            </div>
         </div>
         <div class="mb-3">
-            <select class="form-select mx-auto w-auto" name="status" required>
+            <select class="form-select mx-auto w-auto" name="status" id="status" required>
                 <option disabled selected>Status</option>
                 {% for status in statuses %}
                     <option value="{{status}}">{{status}}</option>   
                 {% endfor %}
             </select>
         </div>
-        <button class="btn btn-primary" type="submit">Next</button>
-    </form>
+        <button class="btn btn-primary" type="submit" id="Next" onclick="register()">Next</button>
+        <script>
+            const fileInput = document.getElementById('image_register');
+            const uploadLabel = document.getElementById('uploadLabel');
+            const previewContainer = document.getElementById('div_register');
+          
+            fileInput.addEventListener('change', () => {
+              const files = fileInput.files;
+              if (files.length > 0) {
+                uploadLabel.textContent = 'Image Uploaded';
+                previewContainer.style.display = 'block';
+                previewContainer.style.top = uploadLabel.offsetTop + uploadLabel.offsetHeight + 'px';
+                previewContainer.style.left = uploadLabel.offsetLeft + 'px';
+                previewContainer.style.width = uploadLabel.offsetWidth + 'px';
+                document.getElementById('profile_img').src = URL.createObjectURL(files[0]);
+                document.getElementById('okay').addEventListener('click', () => {
+                    previewContainer.style.display = 'none';
+                });
+              } else {
+                uploadLabel.textContent = 'Upload Image';
+              }
+            });
+        </script>
+    </div>
 </div>
 {% endblock %}

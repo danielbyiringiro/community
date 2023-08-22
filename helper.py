@@ -63,34 +63,22 @@ def exists_email(email):
 
 def validate_password(password, confirmation):
 
-    if not password:
-        flash("Provide a password")
-        return redirect("/year")
     
-    if not confirmation:
-        flash("Confirm your password")
-        return redirect("/year")
-    
-    if password != confirmation:
-        flash("Passwords do not match")
-        return redirect("/year")
+    if password != confirmation: 
+        return "Passwords do not match"
     
     if len(password) < 8:
-        flash("Password must be at least 8 characters")
-        return redirect("/year")
+        return "Password must be at least 8 characters"
     
     if not any(char.isdigit() for char in password):
-        flash("Password must contain at least one number")
-        return redirect("/year")
+        return "Password must contain at least one number"
     
     if not any(char.isupper() for char in password):
-        flash("Password must contain at least one uppercase letter")
-        return redirect("/year")
+        return "Password must contain at least one uppercase letter"
     
     if not any(char.islower() for char in password):
-        flash("Password must contain at least one lowercase letter")
-        return redirect("/year")
-    
+        return "Password must contain at least one lowercase letter"
+
     return True
 
 def generate_code():

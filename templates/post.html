@@ -5,7 +5,8 @@
 {% endblock %}
 
 {% block main %}
-<div class="post container">
+<div id="posttempcontainer">
+  <div class="post container" id="addText">
     <form action="/newpost" method="post" enctype="multipart/form-data">
         <a href="/users/{{username}}" class="fullname">
             <img src="{{image}}" alt="pic" class="horizontal-image">
@@ -13,23 +14,52 @@
         </a>
         <br><br>
         <textarea id="mytextarea" autofocus placeholder="What do you want to post ?" type="text" name="postContent" rows="10" cols="50" required></textarea>
-        <input autocomplete="off" class="form-control mx-auto w-auto smaller-input" value="Upload Image" id="image" name="image" type="file">
-        <label for="image" id="uploadLabel" class="btn btn-secondary">Upload Image</label>
-        <button class="btn btn-primary" type="submit">Post</button>
+    <div>
+        <div class="image_preview" style="display: none;">
+            <img id="image_preview" src="" alt="Image Preview" style="margin-bottom: 5px;">
+        </div>
+        <div>
+            <input autocomplete="off" class="form-control mx-auto w-auto smaller-input" value="Upload Image" id="image" name="image" type="file">
+            <label for="image" id="uploadLabel" class="btn btn-secondary">Upload Image</label>
+            <button class="btn btn-primary" type="submit">Post</button>
+        </div>
+    </div>
     </form>
 </div>
+
 <script>
-    // If you want to handle the selected file and display its name, you can use this JavaScript code.
-    const fileInput = document.getElementById('image');
-    const uploadLabel = document.getElementById('uploadLabel');
-  
-    fileInput.addEventListener('change', () => {
-      const files = fileInput.files;
-      if (files.length > 0) {
-        uploadLabel.textContent = 'Image Uploaded';
-      } else {
-        uploadLabel.textContent = 'Upload Image';
+  const fileInput = document.getElementById('image');
+  const uploadLabel = document.getElementById('uploadLabel');
+  const previewContainer = document.querySelector('.image_preview');
+  const textarea = document.getElementById('mytextarea');
+
+  fileInput.addEventListener('change', () => {
+    const files = fileInput.files;
+    if (files.length > 0) 
+    {
+      uploadLabel.textContent = 'Image Uploaded';
+      previewContainer.style.display = 'block';
+      document.getElementById('image_preview').src = URL.createObjectURL(files[0]);
+      textarea.style.height = '50px';
+
+      function adjustArea()
+      {
+        textarea.style.height = `${textarea.scrollHeight}px`;
       }
-    });
+
+      textarea.addEventListener('input', adjustArea);
+      textarea.addEventListener('keydown', (event) =>{
+        if (event.key === 'Backspace')
+        {
+          setTimeout(adjustArea, 0);
+        }
+      });
+        
+    } 
+    else 
+    {
+      uploadLabel.textContent = 'Upload Image';
+    }
+  });
 </script>
 {% endblock %}
