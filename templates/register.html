@@ -30,7 +30,7 @@
             <label for="image_register" id="uploadLabel" class="btn btn-secondary" style="width: 275px; color: gray; background-color: white;">Profile Picture</label>
             <div id="div_register" style="display: none;">
                 <p>Profile Preview</p>
-                <div><img id="preview" src="" class="horizontal-image" alt="preview" style="margin-bottom: 5px;"></div>
+                <div><img id="profile_img" src="" class="horizontal-image" alt="preview" style="margin-bottom: 5px;"></div>
                 <div><button id ="okay" class="btn btn-secondary" type="button" style="margin-bottom: 5px;">Okay</button></div>
             </div>
         </div>
@@ -44,7 +44,6 @@
         </div>
         <button class="btn btn-primary" type="submit" id="Next" onclick="register()">Next</button>
         <script>
-            // If you want to handle the selected file and display its name, you can use this JavaScript code.
             const fileInput = document.getElementById('image_register');
             const uploadLabel = document.getElementById('uploadLabel');
             const previewContainer = document.getElementById('div_register');
@@ -57,7 +56,7 @@
                 previewContainer.style.top = uploadLabel.offsetTop + uploadLabel.offsetHeight + 'px';
                 previewContainer.style.left = uploadLabel.offsetLeft + 'px';
                 previewContainer.style.width = uploadLabel.offsetWidth + 'px';
-                document.getElementById('preview').src = URL.createObjectURL(files[0]);
+                document.getElementById('profile_img').src = URL.createObjectURL(files[0]);
                 document.getElementById('okay').addEventListener('click', () => {
                     previewContainer.style.display = 'none';
                 });

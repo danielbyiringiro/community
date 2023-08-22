@@ -138,11 +138,11 @@ body{
 }
 
 #mytextarea {
-    width: 100%; /* Textarea will take the whole available width */
-    border: none;
-    resize: none;
+    width: 100%;
     outline: none;
     position: relative;
+    border: none;
+    resize: none;
   }
 
 #mytextarea :focus {
@@ -195,7 +195,8 @@ label#uploadLabel:active {
     align-items: center;
     margin-top: 10px;
 }
-.post-image {
+.post-image 
+{
     max-width: 100%;
 }
 .post-actions {
@@ -593,4 +594,19 @@ hr {
     font-size: 20px;
     margin-top: 17px;
     left: 0;
+}
+
+.image_preview
+{
+    max-width: 100%;
+}
+
+#image_preview
+{
+    max-width: 100%;
+}
+
+#posttempcontainer
+{
+    display: block;
 }

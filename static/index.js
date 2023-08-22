@@ -657,6 +657,7 @@ function showAndHideAlertYear(message, timeout)
     }, timeout);
 }
 
+
 document.addEventListener('DOMContentLoaded',initializeAllLikeStatus);
 document.addEventListener('DOMContentLoaded',checkIfPostsExist);
 
