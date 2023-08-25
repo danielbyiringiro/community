@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Majors
+{% endblock %}
+
+{% block main %}
+<div id="alert" class="alert_year"></div>
+<div class="container login">
+    <div>
+        <div class="mb-3">
+            <select name="class" class="form-control mx-auto w-auto" id="major">
+                <option disabled selected>Majors</option>
+                {% for major in majors %}
+                    <option value="{{major}}" class="form-control mx-auto w-auto">{{major}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="savemajor()">Save</button>
+    </div>
+</div>
+{% endblock %}

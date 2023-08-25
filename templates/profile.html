@@ -32,7 +32,17 @@
                     </div>
                     <button class="done" onclick="Bio()">Done</button>
                 </div>
-                <button class="edit" onclick="editBio()">Edit Bio</button>
+                <div class="mb-3">
+                    <select name="change" class="form-control mx-auto w-auto" id="change" onchange="redirectOption(this)">
+                        <option disabled selected>Edit</option>
+                        <option value="changebio" class="form-control mx-auto w-auto">Bio</option>
+                        <option value="changeusername" class="form-control mx-auto w-auto">Username</option>
+                        <option value="changepassword" class="form-control mx-auto w-auto">Password</option>
+                        <option value="changegroup" class="form-control mx-auto w-auto">Class Group</option>
+                        <option value="changemajor" class="form-control mx-auto w-auto">Major</option>
+                        <option value="changeprofile" class="form-control mx-auto w-auto">Profile Picture</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="p_container personal_activity">

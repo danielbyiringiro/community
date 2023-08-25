@@ -51,6 +51,7 @@ def time_format(created_at):
 
 def exists_user(username):
 
+    username = username.lower()
     rows = db.execute("SELECT * FROM user WHERE username = ?", username)
     
     return len(rows) != 0

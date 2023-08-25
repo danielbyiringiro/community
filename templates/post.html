@@ -8,22 +8,22 @@
 <div id="posttempcontainer">
   <div class="post container" id="addText">
     <form action="/newpost" method="post" enctype="multipart/form-data">
-        <a href="/users/{{username}}" class="fullname">
-            <img src="{{image}}" alt="pic" class="horizontal-image">
-            {{fullname}}
-        </a>
-        <br><br>
-        <textarea id="mytextarea" autofocus placeholder="What do you want to post ?" type="text" name="postContent" rows="10" cols="50" required></textarea>
-    <div>
-        <div class="image_preview" style="display: none;">
-            <img id="image_preview" src="" alt="Image Preview" style="margin-bottom: 5px;">
-        </div>
-        <div>
-            <input autocomplete="off" class="form-control mx-auto w-auto smaller-input" value="Upload Image" id="image" name="image" type="file">
-            <label for="image" id="uploadLabel" class="btn btn-secondary">Upload Image</label>
-            <button class="btn btn-primary" type="submit">Post</button>
-        </div>
-    </div>
+      <a href="/users/{{username}}" class="fullname">
+          <img src="{{image}}" alt="pic" class="horizontal-image">
+          {{fullname}}
+      </a>
+      <br><br>
+      <textarea id="mytextarea" autofocus placeholder="What do you want to post ?" type="text" name="postContent" rows="10" cols="50" required></textarea>
+      <div>
+          <div class="image_preview" style="display: none;">
+              <img id="image_preview" src="" alt="Image Preview" style="margin-bottom: 5px;">
+          </div>
+          <div>
+              <input autocomplete="off" class="form-control mx-auto w-auto smaller-input" value="Upload Image" id="image" name="image" type="file">
+              <label for="image" id="uploadLabel" class="btn btn-secondary">Upload Image</label>
+              <button class="btn btn-primary" type="submit">Post</button>
+          </div>
+      </div>
     </form>
 </div>
 

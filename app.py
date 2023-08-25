@@ -1,6 +1,6 @@
 from threading import Thread
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session, send_from_directory, jsonify
+from flask import Flask, redirect, render_template, request, session, send_from_directory, jsonify
 from flask_session import Session
 from flask_mail import Mail
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -51,14 +51,13 @@ def index():
 
         username, picture_path, _= user_details()
 
-        rows = db.execute("SELECT * FROM post")
+        rows = db.execute("SELECT * FROM post ORDER BY created_at DESC")
         posts = []
 
         for post in rows:
 
             post_id = post['id']
             post_content = post['description']
-            userPicturePath = post['userPicturePath']
             picturepath = post['picturePath'] if not None else None
             liked_rows = db.execute("SELECT * FROM liked WHERE postId = ?", post_id)
             likes = len(liked_rows)
@@ -67,6 +66,8 @@ def index():
             created_at = post['created_at']
             created_at = time_format(created_at)
             userId = post['userId']
+            userPicturePath = db.execute("SELECT pictureId FROM user WHERE id = ?", userId)[0]['pictureId']
+            userPicturePath = id_path(userPicturePath)
             post_username = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
             yeargroup = db.execute("SELECT yearorposition FROM user WHERE id = ?", userId)[0]['yearorposition']
             yeargroup = yeargroup_format(yeargroup)
@@ -76,8 +77,6 @@ def index():
             post_details = {'class': yeargroup, 'postContent': post_content, 'username': post_username, 'profilePicturePath': userPicturePath, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'class': yeargroup, 'post_id': post_id, 'major': major, 'comments': comments}
             posts.append(post_details)
         
-        posts.reverse()
-
         return render_template("index.html", username = username, image = picture_path, posts = posts)
 
 
@@ -159,6 +158,7 @@ def record():
 
     name = request.get_json()['name']
     username = request.get_json()['username']
+    username = username.lower()
     email = request.get_json()['email']
     status = request.get_json()['status']
     profile_picture = request.get_json()['profile_picture']
@@ -205,7 +205,7 @@ def year():
 
 @app.route("/yearpost", methods = ["POST"])
 def yearpost():
-    print(request.get_json())
+    
     year = request.get_json()['year']
     major = request.get_json()['major']
     id = request.get_json()['id']
@@ -264,14 +264,14 @@ def newpost():
             image_id = None
         
         userId = session["user_id"]
-        username, userPicturePath, fullname = user_details()
+        username, _ , _ = user_details()
 
         if image_id:
             picture_path = db.execute("SELECT imagePath from image where id = ?", image_id)[0]['imagePath']
-            db.execute("INSERT INTO post(userId, fullname, description, userPicturePath, picturePath) values(?,?,?,?,?)", userId, fullname, postContent, userPicturePath, picture_path)
+            db.execute("INSERT INTO post(userId, description, picturePath) values(?,?,?)", userId, postContent, picture_path)
             return redirect("/")
 
-        db.execute("INSERT INTO post(userId, fullname, description, userPicturePath) values(?,?,?,?)", userId, fullname, postContent, userPicturePath)
+        db.execute("INSERT INTO post(userId, description) values(?,?)", userId, postContent)
         return redirect("/")
 
 
@@ -503,15 +503,6 @@ def deletepost(post_id):
     except Exception as e:
         return jsonify({"error":str(e)})
 
-@app.route('/bio', methods = ["POST"])
-@login_required
-def bio():
-
-    bio = request.get_json()['bio']
-    userId = session['user_id']
-    db.execute('UPDATE user SET bio = ? WHERE id = ?', bio, userId)
-    return jsonify({"success": True, "bio":bio})
-
 @app.route('/explore')
 @login_required
 def explore():
@@ -629,8 +620,9 @@ def circle_requests(user_id):
 def checkUsername():
 
     username = request.get_json()['username']
-    if exists_user(username):
+    username = username.lower()
 
+    if exists_user(username):
         return jsonify({"success": False, "message": f"Username '{username}' already in use"})
     
     else:
@@ -663,3 +655,149 @@ def code_compare():
     else:
 
         return jsonify({"success": False, "message": "Code does not match with code sent to your email"})
+    
+@app.route('/users/changebio', methods = ["GET","POST"])
+@login_required
+def changebio():
+    
+    if request.method == "POST":
+
+        bio = request.get_json()['bio']
+        userId = session['user_id']
+        username = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
+        db.execute('UPDATE user SET bio = ? WHERE id = ?', bio, userId)
+        return jsonify({"success": True, "username" : username})
+    
+    else:
+
+        username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
+        return render_template("bio.html", username = username)
+
+@app.route('/users/changeusername', methods = ["GET","POST"])
+@login_required
+def changeusername():
+    
+    if request.method == "POST":
+
+        username = request.get_json()['username']
+        username = username.lower()
+        userId = session['user_id']
+        db.execute('UPDATE user SET username = ? WHERE id = ?', username, userId)
+        return jsonify({"success": True, "username" : username})
+    
+    else:
+
+        username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
+        return render_template("username.html", username = username)
+
+@app.route('/users/changepassword', methods = ["GET","POST"])
+@login_required
+def changepassword():
+    
+    if request.method == "POST":
+
+        newpassword = request.get_json()['newpassword']
+        userId = session['user_id']
+        username = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
+        hash = generate_password_hash(newpassword)
+        db.execute('UPDATE user SET hash = ? WHERE id = ?', hash, userId)
+        return jsonify({"success": True, "username" : username})
+    
+    else:
+
+        username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
+        return render_template("password.html", username = username)
+
+@app.route('/checkoldpassword', methods = ["POST"])
+@login_required
+def checkoldpassword():
+    
+    oldpassword = request.get_json()['oldPassword']
+    if existsOldPassword(oldpassword):
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False, "message": "Old password is incorrect"})
+
+
+def existsOldPassword(password):
+
+    hash = db.execute("SELECT hash FROM user WHERE id = ?", session['user_id'])[0]['hash']
+    return check_password_hash(hash, password)
+
+@app.route('/users/changegroup', methods = ["GET","POST"])
+@login_required
+def changegroup():
+    
+    if request.method == "POST":
+
+        classg = request.get_json()['classg']
+        classg = int(classg)
+        years = list(range(2002,2028))
+        userId = session['user_id']
+        username = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
+        
+        if classg in years:
+            db.execute('UPDATE user SET yearorposition = ? WHERE id = ?', classg, userId)
+            return jsonify({"success": True, "username" : username})
+        else:
+            return jsonify({"success": False, "message": "Invalid Year Group"})
+    
+    else:
+
+        years = list(range(2002,2028))
+        years.reverse()
+        username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
+        return render_template("group.html", username = username, years=years)
+
+@app.route('/users/changemajor', methods = ["GET","POST"])
+@login_required
+def changemajor():
+    
+    if request.method == "POST":
+
+        major = request.get_json()['major']
+        majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
+        userId = session['user_id']
+        username = db.execute("SELECT username FROM user WHERE id = ?", userId)[0]['username']
+        
+        if major in majors:
+            db.execute('UPDATE user SET major = ? WHERE id = ?', major, userId)
+            return jsonify({"success": True, "username" : username})
+        else:
+            return jsonify({"success": False, "message": "Invalid Major"})
+    
+    else:
+
+        majors = ['Computer Science','Computer Engineering','Mechanical Engineering','Electrical and E. Engineering', 'Business Admin', 'Management Infomation Systems', 'Mechatronics']
+        username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
+        return render_template("majors.html", username = username, majors = majors)
+
+@app.route('/users/changeprofile', methods = ["GET","POST"])
+@login_required
+def changeprofile():
+    
+    if request.method == "POST":
+
+        picture = request.files.get("profile_picture")
+        location = "profile_pic"
+        response = picture_handler(picture, location)
+        username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
+
+        if response != False:
+            image_id = response
+            db.execute("UPDATE user SET pictureId = ? WHERE id = ?", image_id, session['user_id'])
+            return jsonify({'success': True, 'message': "Profile picture changed successfully", "username" : username})
+        
+        else:
+
+            return jsonify({'success': False, 'message': 'Image file is not uploaded or is not supported'})
+    
+    else:
+
+        username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
+        return render_template("changeprofile.html", username = username)
+
+    
+    
+
+
