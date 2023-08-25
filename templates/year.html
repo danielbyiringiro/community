@@ -20,10 +20,10 @@
             <input autocomplete="off" class="form-control mx-auto w-auto" id = "code" name="code" placeholder="Code" type="text" onblur="codeCompare({{session['registration_id']}})" required>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto" id = "password" name="password" placeholder="Password" type="password" onclick="passwordAlert()" onblur="passwordAnalyse()" required>
+            <input autocomplete="off" class="form-control mx-auto w-auto" id = "password" name="password" placeholder="Password" type="password" onblur="passwordAnalyse('password')" required>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto" id = "confirm" name="confirm" placeholder="Password Again" type="password" onblur="passwordCompare()" required>
+            <input autocomplete="off" class="form-control mx-auto w-auto" id = "confirm" name="confirm" placeholder="Password Again" type="password" onblur="passwordCompare('confirm','password')" required>
             <input type="hidden" value="{{id}}" name="id">
         </div>
         <div class="mb-3">

@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block main %}
+<div id="alert" class="alert_year"></div>
+<div class="container login" id="changeprofile">
+    <div>
+        <div class="mb-3">
+            <input autocomplete="off" class="form-control mx-auto w-auto small-input" id="image_register" name="image" type="file" required>
+            <label for="image_register" id="uploadLabel" class="btn btn-secondary" style="width: 275px; color: gray; background-color: white;">Profile Picture</label>
+            <div id="div_register" style="display: none;">
+                <p>Profile Preview</p>
+                <div><img id="profile_img" src="" class="horizontal-image" alt="preview" style="margin-bottom: 5px;"></div>
+                <div><button id ="okay" class="btn btn-secondary" type="button" style="margin-bottom: 5px;">Okay</button></div>
+            </div>
+        </div>
+        <button class="btn btn-primary" id="save">Save</button>
+    </div>
+</div>
+<script>
+    const fileInput = document.getElementById('image_register');
+    const uploadLabel = document.getElementById('uploadLabel');
+    const previewContainer = document.getElementById('div_register');
+    const container = document.getElementById('changeprofile');
+    const save = document.getElementById('save');
+    const alertdiv = document.getElementById('alert');
+    
+    function showAndHideAlertYear(message, timeout) 
+    {
+        const alertElement = document.querySelector(".alert_year");
+        alertElement.textContent = message;
+        alertElement.style.display = "block";
+
+        setTimeout(function () 
+        {
+            alertElement.style.display = "none";
+        }, timeout);
+    }
+
+    fileInput.addEventListener('change', () => {
+      const files = fileInput.files;
+      if (files.length > 0) {
+        uploadLabel.textContent = 'Image Uploaded';
+        previewContainer.style.display = 'block';
+        previewContainer.style.top = uploadLabel.offsetTop + uploadLabel.offsetHeight + 'px';
+        previewContainer.style.left = uploadLabel.offsetLeft + 'px';
+        previewContainer.style.width = uploadLabel.offsetWidth + 'px';
+        document.getElementById('profile_img').src = URL.createObjectURL(files[0]);
+        container.style.height = '300px';
+        document.getElementById('okay').addEventListener('click', () => {
+            previewContainer.style.display = 'none';
+            container.style.height = '150px';
+
+            save.addEventListener('click', () => {
+                const formData = new FormData();
+                formData.append('profile_picture', files[0]);
+                fetch('/users/changeprofile', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success === true) 
+                    {
+                        window.location.href = '/users/' + result.username;
+                    } else {
+                        showAndHideAlertYear(result.message, 3000);
+                    }
+                });
+            });
+        });
+      } else {
+        uploadLabel.textContent = 'Upload Image';
+      }
+    });
+</script>
+{% endblock %}

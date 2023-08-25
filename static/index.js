@@ -339,9 +339,9 @@ function editBio()
 
 function Bio()
 {
-    const bio = document.getElementById('bioinput').value;
+    const bio = document.getElementById('changebio').value;
 
-    fetch('/bio', {
+    fetch('/users/changebio', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -352,12 +352,45 @@ function Bio()
     .then(data => {
         if (data['success'] === true)
         {
-            const bio = document.getElementById('bio');
-            bio.innerHTML = data['bio'];
-            const editBioInput = document.querySelector('.bio');
-            const editBioButton = document.querySelector('.edit.disapear');
-            editBioInput.classList.add('disapear');
-            editBioButton.classList.remove('disapear');
+            window.location.href = '/users/' + data['username'];
+        }
+    })
+    .catch(error => console.error('Error:', error));
+
+}
+
+function changeUsername()
+{
+    const username = document.getElementById('changeusername').value;
+
+    fetch('/checkuser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({username: username}),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data['success'] === true)
+        {
+            fetch('/users/changeusername', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({username: username}),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data['success'] === true)
+                {
+                    window.location.href = '/users/' + data['username'];
+                }
+            }
+            )
+            .catch(error => console.error('Error:', error));
+
         }
     })
     .catch(error => console.error('Error:', error));
@@ -441,6 +474,31 @@ function checkusername()
     .catch(error => console.error('Error:', error));
 }
 
+function checkchangeusername()
+{
+    const usernameInput = document.getElementById('changeusername');
+    const username = usernameInput.value;
+
+    fetch('/checkuser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({username: username}),
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data['success'] === false)
+        {
+
+            showAndHideAlertYear(data['message'], 3000);
+            usernameInput.focus();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 function checkemail()
 {
     const emailInput = document.getElementById('email');
@@ -464,6 +522,7 @@ function checkemail()
     })
     .catch(error => console.error('Error:', error));
 }
+
 
 function showAndHideAlert(message, timeout) 
 {
@@ -585,14 +644,32 @@ function register()
 
 }
 
-function passwordAlert()
+function checkOldPassword()
 {
-    showAndHideAlertYear("Password has to be at least 8 characters long including a number, uppercase and lowercase key", 4000);
+    const oldPasswordInput = document.getElementById('oldpassword');
+    const oldPassword = oldPasswordInput.value;
+
+    fetch('/checkoldpassword', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({oldPassword: oldPassword}),
+    })
+    .then(res => res.json())
+    .then(data => {
+            
+        if (data['success'] === false)
+        {
+            showAndHideAlertYear(data['message'], 3000);
+            oldPasswordInput.focus();
+        }
+    })
 }
 
-function passwordAnalyse()
+function passwordAnalyse(id)
 {
-    const passwordInput = document.getElementById('password');
+    const passwordInput = document.getElementById(id);
     const password = passwordInput.value;
 
     if (password.length < 8)
@@ -633,16 +710,67 @@ function hasDigit(str) {
     return /\d/.test(str);
 }
 
-function passwordCompare()
+function passwordCompare(id,passid)
 {
-    const password = document.getElementById('password').value;
-    const confirmInput = document.getElementById('confirm');
+    const password = document.getElementById(passid).value;
+    const confirmInput = document.getElementById(id);
     const confirm = confirmInput.value;
 
     if (password !== confirm)
     {
         showAndHideAlertYear("Passwords do not mach", 2000);
+        return;
     }
+}
+
+function changepassword()
+{
+    const oldPasswordInput = document.getElementById('oldpassword');
+    const oldPassword = oldPasswordInput.value;
+
+    fetch('/checkoldpassword', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({oldPassword: oldPassword}),
+    })
+    .then(res => res.json())
+    .then(data => {
+            
+        if (data['success'] === false)
+        {
+            showAndHideAlertYear(data['message'], 3000);
+            oldPasswordInput.focus();
+        }
+        else
+        {
+            const newpassword = document.getElementById('newpassword').value;
+            const newpasswordconfirm = document.getElementById('confirmnewpassword').value;
+
+            if (newpassword !== newpasswordconfirm)
+            {
+                showAndHideAlertYear("Passwords do not mach", 2000);
+                return;
+            }
+
+            fetch('/users/changepassword', {
+                method : 'POST',
+                headers : {
+                    'Content-Type': 'application/json',
+                },
+                body : JSON.stringify({newpassword : newpassword}),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success === true)
+                {
+                    window.location.href = '/users/' + data.username;
+                }
+            })
+
+        }
+    })
 }
 
 function showAndHideAlertYear(message, timeout) 
@@ -731,7 +859,6 @@ function loginUsername()
     if (usename === '')
     {
         showAndHideAlertYear("Please enter your username", 3000);
-        usernameInput.focus();
         return;
     }
 
@@ -747,7 +874,6 @@ function loginUsername()
         if (data['success'] === false)
         {
             showAndHideAlertYear(data['message'], 3000);
-            usernameInput.focus();
         }
     });
 }
@@ -787,6 +913,56 @@ function loginall()
         else
         {
             showAndHideAlertYear(data['message'], 3000);
+        }
+    })
+}
+
+function savegroup()
+{
+    const classg = document.getElementById('class').value;
+    
+    fetch('/users/changegroup', {
+        method: 'POST',
+        headers : {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({classg: classg}),
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.success === true)
+        {
+            window.location.href = '/users/' + data.username;
+        }
+        else
+        {
+            showAndHideAlertYear(data.message, 3000);
+        }
+    })
+}
+
+function savemajor()
+{
+    const major = document.getElementById('major').value;
+    
+    fetch('/users/changemajor', {
+        method: 'POST',
+        headers : {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({major: major}),
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.success === true)
+        {
+            window.location.href = '/users/' + data.username;
+        }
+        else
+        {
+            showAndHideAlertYear(data.message, 3000);
         }
     })
 }
