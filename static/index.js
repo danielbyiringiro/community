@@ -884,6 +884,7 @@ function loginall()
     const passwordInput = document.getElementById('loginpassword');
     const password = passwordInput.value;
 
+    loginUsername();
     if (password === '')
     {
         showAndHideAlertYear("Please fill in your password", 3000);
