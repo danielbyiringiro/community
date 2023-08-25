@@ -83,7 +83,7 @@ def validate_password(password, confirmation):
     return True
 
 def generate_code():
-    characters = string.ascii_letters + string.digits + string.punctuation
+    characters = string.ascii_letters + string.digits 
     code = ''.join(random.choice(characters) for _ in range(6))
     return code
 
@@ -105,25 +105,6 @@ def picture_handler(image_file, location):
 
         return False
 
-def deletePicture(id):
-
-    imagePath = db.execute("SELECT imagePath FROM image where id = ?", id)[0]['imagePath']
-    db.execute("DELETE FROM image WHERE id = ?", id)
-    
-    try:
-        os.remove(imagePath)
-        return True
-    except FileNotFoundError:
-        return False
-    except OSError as e:
-        return e
-
-def cleanfile(id):
-    response = deletePicture(id)
-    if response != True:
-        print(response)
-
-
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}  # Add any other allowed extensions
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -131,6 +112,7 @@ def allowed_file(filename):
 def generate_unique_filename(filename):
     unique_filename = str(uuid.uuid4()) + '_' + secure_filename(filename)
     return unique_filename
+
 def picture_handler(image_file, location): 
 
     filename = image_file.filename
@@ -148,24 +130,6 @@ def picture_handler(image_file, location):
     else:
 
         return False
-
-def deletePicture(id):
-
-    imagePath = db.execute("SELECT imagePath FROM image where id = ?", id)[0]['imagePath']
-    db.execute("DELETE FROM image WHERE id = ?", id)
-    
-    try:
-        os.remove(imagePath)
-        return True
-    except FileNotFoundError:
-        return False
-    except OSError as e:
-        return e
-
-def cleanfile(id):
-    response = deletePicture(id)
-    if response != True:
-        print(response)
 
 
 def allowed_file(filename):
@@ -195,3 +159,16 @@ def major_format(major):
         combination += letter
     
     return combination
+
+def admin_required(f):
+    """
+    Decorate admin route to require user to be an admin.
+
+    http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("admin")  == False:
+            return redirect("/")
+        return f(*args, **kwargs)
+    return decorated_function

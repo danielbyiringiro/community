@@ -6,8 +6,10 @@ from flask_mail import Mail
 from werkzeug.security import check_password_hash, generate_password_hash
 from helper import *
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 import os
+import csv
 
 
 load_dotenv()
@@ -104,7 +106,16 @@ def login():
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
             return jsonify({"success": False, "message": "Username and Password do not match"})
 
-        session["user_id"] = rows[0]["id"]
+        userId = rows[0]["id"]
+        admin_ids = [27]
+
+        if userId in admin_ids:
+            session["user_id"] = userId
+            session["admin"] = True
+        
+        else:
+            session["user_id"] = userId
+            session["admin"] = False
 
         return jsonify({"success": True})
     
@@ -135,8 +146,23 @@ def registerj():
         return jsonify({'success': False, 'message': 'Email already in use'}), 409
     if status.lower() not in statuses_lower:
         return jsonify({'success': False, 'message': 'Invalid status'}), 409
+    if not isAshesiEmail(email):
+        return jsonify({'success': False, 'message': 'Use an Ashesi Email'}), 409
+    if not isInWaitlist(email):
+        return jsonify({'success': False, 'message': 'You are not in the waitlist'}), 409
     
     return jsonify({'success': True}), 200
+
+def isAshesiEmail(email):
+
+    return email.endswith("@ashesi.edu.gh")
+
+def isInWaitlist(email):
+
+    with open('email.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            return email in row
 
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -458,7 +484,6 @@ def user(username):
     bio = db.execute("SELECT bio FROM user WHERE id = ?", userId)[0]['bio'] if not None else ''
     rows = db.execute("SELECT * FROM post WHERE userId = ?", userId)
     length = len(rows)
-    print(f"Length is {length}")
     if length > 0:
         divexist = True
     else:
@@ -797,7 +822,52 @@ def changeprofile():
         username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
         return render_template("changeprofile.html", username = username)
 
+@app.route('/admin')
+@login_required
+@admin_required
+def admin():
+
+    username = db.execute("SELECT username FROM user WHERE id = ?", session['user_id'])[0]['username']
+    return render_template("admin.html", data = admin_details(), username = username)
+
     
+def days_between():
+    """return days between the starting date and the current date"""
+
+    today = datetime.today()
+
+    target_date = datetime(2023, 8, 24)
+
+    days_passed = (today - target_date).days
+
+    dates_in_between = []
+
+    for i in range(1, days_passed):
+        date = target_date + timedelta(days=i)
+        date = date.strftime("%Y-%m-%d")
+        dates_in_between.append(date)
     
+    today = today.strftime("%Y-%m-%d")
+    dates_in_between.append(today)
+
+    return dates_in_between
 
 
+def admin_details():
+
+    dates = days_between()
+    details = []
+    for date in dates:
+
+        date = date + '%'
+        total_users = db.execute("select count(*) as num from user where created_at like ?", date)[0]['num']
+        total_posts = db.execute("select count(*) as num from post where  created_at like ?", date)[0]['num']
+        total_comments = db.execute("select count(*) as num from comment where created_at like ?", date)[0]['num']
+
+        date = date.split('%')[0]
+        day_detail = {'date': date, 'users': total_users, 'posts': total_posts if not None else 0, 'comments': total_comments if not None else 0}
+        details.append(day_detail)
+
+    details.reverse()
+
+    return details

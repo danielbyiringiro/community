@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Admin
+{% endblock %}
+
+{% block main %}
+<div id="alert" class="alert_year"></div>
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Users</th>
+                <th>Posts</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+                <tr>
+                    <td>{{row['date']}}</td>
+                    <td>{{row['users']}}</td>
+                    <td>{{row['posts']}}</td>
+                    <td>{{row['comments']}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
