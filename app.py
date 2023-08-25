@@ -146,13 +146,11 @@ def registerj():
         return jsonify({'success': False, 'message': 'Email already in use'}), 409
     if status.lower() not in statuses_lower:
         return jsonify({'success': False, 'message': 'Invalid status'}), 409
-    
-    """
     if not isAshesiEmail(email):
         return jsonify({'success': False, 'message': 'Use an Ashesi Email'}), 409
     if not isInWaitlist(email):
         return jsonify({'success': False, 'message': 'You are not in the waitlist'}), 409
-    """
+    
     
     return jsonify({'success': True}), 200
 
