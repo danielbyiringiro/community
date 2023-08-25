@@ -107,9 +107,9 @@ def login():
             return jsonify({"success": False, "message": "Username and Password do not match"})
 
         userId = rows[0]["id"]
-        admin_ids = [27]
+        admin_ids = [18, 20]
 
-        if userId in admin_ids:
+        if int(userId) in admin_ids:
             session["user_id"] = userId
             session["admin"] = True
         
@@ -859,12 +859,13 @@ def admin_details():
     details = []
     for date in dates:
 
-        date = date + '%'
-        total_users = db.execute("select count(*) as num from user where created_at like ?", date)[0]['num']
-        total_posts = db.execute("select count(*) as num from post where  created_at like ?", date)[0]['num']
-        total_comments = db.execute("select count(*) as num from comment where created_at like ?", date)[0]['num']
+        date = date + ' 23:59:59'
+        print(date)
+        total_users = db.execute("select count(*) as num from user where created_at <= ?", date)[0]['num']
+        total_posts = db.execute("select count(*) as num from post where  created_at <= ?", date)[0]['num']
+        total_comments = db.execute("select count(*) as num from comment where created_at <= ?", date)[0]['num']
 
-        date = date.split('%')[0]
+        date = date.split()[0]
         day_detail = {'date': date, 'users': total_users, 'posts': total_posts if not None else 0, 'comments': total_comments if not None else 0}
         details.append(day_detail)
 
