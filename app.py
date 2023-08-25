@@ -148,9 +148,6 @@ def registerj():
         return jsonify({'success': False, 'message': 'Invalid status'}), 409
     if not isAshesiEmail(email):
         return jsonify({'success': False, 'message': 'Use an Ashesi Email'}), 409
-    if not isInWaitlist(email):
-        return jsonify({'success': False, 'message': 'You are not in the waitlist'}), 409
-    
     
     return jsonify({'success': True}), 200
 
@@ -158,12 +155,6 @@ def isAshesiEmail(email):
 
     return email.endswith("@ashesi.edu.gh")
 
-def isInWaitlist(email):
-
-    with open('email.csv', 'r') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            return email in row
 
 @app.route("/upload", methods=["POST"])
 def upload():
