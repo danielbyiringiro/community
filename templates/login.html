@@ -9,20 +9,40 @@
     body {
         background-image: url("/static/background.jpg");
     }
+
+    .login-container {
+        text-align: center;
+        background-color: white;
+        border: 1px solid #ddd;
+        max-width: 400px;
+        margin: 0 auto;
+        border-radius: 10px;
+        max-height: 500px;
+        margin-top: 50px;
+    }
+
+    .or {
+        margin: 20px 0;
+    }
+
+    .or p {
+        position: relative;
+        top: -12px;
+        display: inline-block;
+        padding: 0 10px;
+    }
 </style>
 {% endblock %}
 
 {% block main %}
 <div id="alert" class="alert_year"></div>
 <div class="login">
-    <div>
-        <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="loginusername" name="username" placeholder="Username" type="text" required>
-        </div>
-        <div class="mb-3">
-            <input autocomplete="off" class="form-control mx-auto w-auto" id="loginpassword" name="password" placeholder="Password" type="password" required>
-        </div>
-        <button class="btn btn-primary" onclick="loginall()">Log In</button>
+    <div class="mb-3">
+        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="loginusername" name="username" placeholder="Username" type="text" required>
     </div>
+    <div class="mb-3">
+        <input autocomplete="off" class="form-control mx-auto w-auto" id="loginpassword" name="password" placeholder="Password" type="password" required>
+    </div>
+    <button class="btn btn-primary" onclick="loginall()">Log In</button>
 </div>
 {% endblock %}

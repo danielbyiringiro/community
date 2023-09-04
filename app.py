@@ -284,6 +284,38 @@ def newpost():
         userId = session["user_id"]
         username, _ , _ = user_details()
 
+        user_id = db.execute("SELECT friend_id FROM circle WHERE user_id = ? and status = 'APPROVE'", userId)
+        friend_id = db.execute("SELECT user_id FROM circle WHERE friend_id = ? and status = 'APPROVE'", userId)
+
+        id_list = []
+
+        for id in user_id:
+            id_list.append(id['friend_id'])
+        
+        for id in friend_id:
+            id_list.append(id['user_id'])
+
+        if 18 not in id_list: id_list.append(18)
+        if 20 not in id_list: id_list.append(20)
+
+        email_addresses = db.execute("SELECT email FROM user WHERE id IN (?)", id_list)
+        email = [x['email'] for x in email_addresses]
+        sending_email = os.getenv("MAIL_USERNAME")
+        msg = Message('Post From Connection on Community', sender = sending_email, recipients = email)
+        msg.body = f"""
+
+        Hi,
+
+        {username} from your circle just posted on Community.
+        Check out their post!
+
+        From,
+        Community Team
+        """
+
+        thread = Thread(target=send_async_email, args=(app, msg))
+        thread.start()
+
         if image_id:
             picture_path = db.execute("SELECT imagePath from image where id = ?", image_id)[0]['imagePath']
             db.execute("INSERT INTO post(userId, description, picturePath) values(?,?,?)", userId, postContent, picture_path)
@@ -319,8 +351,9 @@ def user_profile(username):
     date = time_format(date)
     date = date.split()
     date = f"{date[1]} {date[2]}"
-    perimeter = db.execute("SELECT * FROM circle WHERE user_id = ? or friend_id = ? and status = 'APPROVE'", userId, userId)
-    perimeter = len(perimeter)
+    user_id = db.execute("SELECT friend_id FROM circle WHERE user_id = ? and status = 'APPROVE'", userId)
+    friend_id = db.execute("SELECT user_id FROM circle WHERE friend_id = ? and status = 'APPROVE'", userId)
+    perimeter = len(user_id) + len(friend_id)
 
     return fullname, path, classgroup, major, date, perimeter
 
