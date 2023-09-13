@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    {{username}}
+    {{user_username}}
 {% endblock %}
 
 {% block style %}
@@ -17,13 +17,13 @@
             </div>
             <div class="details">
                 <p class="fullname">{{fullname}}</p>
-                <p style="color: #c04040;">@{{username}}</p>
+                <p style="color: #c04040;">@{{user_username}}</p>
                 <p>{{classgroup}} {{major}}</p>
                 <p> Joined On {{date}}</p>
                 <hr>
             </div>
             <div class="links">
-                <p>Perimeter : {{perimeter}}</p>
+                <p><a href="/user/{{user_username}}/circle">Perimeter : {{perimeter}}</a></p>
                 <p>Bio:</p>
                 <p id="bio">{{bio}}</p>
             </div>
@@ -47,7 +47,11 @@
                     <div class="post-actions">
                         <div class="vibe-comment">
                             <button class="vibe-button" onclick="like({{post['post_id']}})">
-                                <img id="vibe-image-{{post['post_id']}}" data-post-id="{{post['post_id']}}" src="" alt="vibe">
+                                {% if post['liked'] == True %}
+                                    <img id="vibe-image-{{post['post_id']}}" data-post-id="{{post['post_id']}}" src="/static/vibed.jpeg" alt="vibe">
+                                {% else %}
+                                    <img id="vibe-image-{{post['post_id']}}" data-post-id="{{post['post_id']}}" src="/static/vibe.png" alt="vibe">
+                                {% endif %}
                                 <strong>
                                     <span id="vibes-count-{{post['post_id']}}">{{post['likes']}}</span>
                                     <span class="strong">vibes</span>

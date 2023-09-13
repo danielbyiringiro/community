@@ -53,7 +53,21 @@ def index():
 
         username, picture_path, _= user_details()
 
-        rows = db.execute("SELECT * FROM post ORDER BY created_at DESC")
+        userId = session["user_id"]
+        user_id = db.execute("SELECT friend_id FROM circle WHERE user_id = ? and status = 'APPROVE'", userId)
+        friend_id = db.execute("SELECT user_id FROM circle WHERE friend_id = ? and status = 'APPROVE'", userId)
+
+        id_list = [userId]
+
+        for id in user_id:
+            id_list.append(id['friend_id'])
+        
+        for id in friend_id:
+            id_list.append(id['user_id'])
+        
+        print(id_list)
+
+        rows = db.execute("SELECT * FROM post WHERE userId IN (?) ORDER BY created_at DESC", id_list)
         posts = []
 
         for post in rows:
@@ -75,8 +89,10 @@ def index():
             yeargroup = yeargroup_format(yeargroup)
             major = db.execute("SELECT major FROM user WHERE id = ?", userId)[0]['major']
             major = major_format(major)
+            user_liked = db.execute("SELECT * FROM liked WHERE postId = ? and userId = ?", post_id, userId)
+            liked = True if (len(user_liked) == 1) else False
 
-            post_details = {'class': yeargroup, 'postContent': post_content, 'username': post_username, 'profilePicturePath': userPicturePath, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'class': yeargroup, 'post_id': post_id, 'major': major, 'comments': comments}
+            post_details = {'class': yeargroup, 'postContent': post_content, 'username': post_username, 'profilePicturePath': userPicturePath, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'class': yeargroup, 'post_id': post_id, 'major': major, 'comments': comments, 'liked' : liked}
             posts.append(post_details)
         
         return render_template("index.html", username = username, image = picture_path, posts = posts)
@@ -505,6 +521,7 @@ def search():
 def user(username):
     
     userId = db.execute("SELECT id FROM user WHERE username = ?", username)[0]['id']
+    current_username = db.execute("SELECT username FROM user WHERE id = ?", session["user_id"])[0]["username"]
 
     bio = db.execute("SELECT bio FROM user WHERE id = ?", userId)[0]['bio'] if not None else ''
     rows = db.execute("SELECT * FROM post WHERE userId = ?", userId)
@@ -529,7 +546,9 @@ def user(username):
         created_at = post['created_at']
         created_at = time_format(created_at)
         p_major = major_format(major)
-        post_details = {'postContent': post_content, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'post_id': post_id, 'comments': comments, 'major':p_major, 'divexist': divexist}
+        user_liked = db.execute("SELECT * FROM liked WHERE postId = ? and userId = ?", post_id, userId)
+        liked = True if (len(user_liked) == 1) else False
+        post_details = {'postContent': post_content, 'picturePath': picturepath, 'time': created_at, 'likes':likes, 'post_id': post_id, 'comments': comments, 'major':p_major, 'divexist': divexist, 'liked': liked}
         posts.append(post_details)
         
     posts.reverse()
@@ -537,7 +556,7 @@ def user(username):
     if userId == session['user_id']:
         return render_template("profile.html", image = path, username = username, fullname = fullname, classgroup = classgroup, major = major, date = date, perimeter = perimeter, posts = posts, bio = bio)
     else:
-        return render_template("otherprofile.html", image = path, username = username, fullname = fullname, classgroup = classgroup, major = major, date = date, perimeter = perimeter, posts = posts, bio = bio)
+        return render_template("otherprofile.html", image = path, username = current_username, user_username = username, fullname = fullname, classgroup = classgroup, major = major, date = date, perimeter = perimeter, posts = posts, bio = bio)
 
 
 @app.route("/deletepost/<post_id>", methods=["POST"])
@@ -885,7 +904,6 @@ def admin_details():
     for date in dates:
 
         date = date + ' 23:59:59'
-        print(date)
         total_users = db.execute("select count(*) as num from user where created_at <= ?", date)[0]['num']
         total_posts = db.execute("select count(*) as num from post where  created_at <= ?", date)[0]['num']
         total_comments = db.execute("select count(*) as num from comment where created_at <= ?", date)[0]['num']
@@ -897,3 +915,35 @@ def admin_details():
     details.reverse()
 
     return details
+
+@app.route("/user/<username>/circle")
+@login_required
+def user_circle(username):
+
+    userId = db.execute("SELECT id FROM user WHERE username = ?", username)[0]['id']
+    current_username = db.execute("SELECT username FROM user WHERE id = ?", session["user_id"])[0]['username']
+
+    user_id = db.execute("SELECT friend_id FROM circle WHERE user_id = ? and status = 'APPROVE'", userId)
+    friend_id = db.execute("SELECT user_id FROM circle WHERE friend_id = ? and status = 'APPROVE'", userId)
+
+    id_list = []
+
+    for id in user_id:
+        id_list.append(id['friend_id'])
+    
+    for id in friend_id:
+        id_list.append(id['user_id'])
+    
+    userList = []
+
+    for id in id_list:
+
+        friend = db.execute("SELECT * FROM user WHERE id = ?", id)[0]
+        user_details = {"username": friend["username"], "path": id_path(friend["pictureId"]), "class": yeargroup_format(friend["yearorposition"]), "major": major_format(friend["major"]), "id": id, "name": friend["name"]}
+        userList.append(user_details)
+
+    
+    return render_template("connection.html", users = userList, username_name = username, username = current_username)
+    
+
+

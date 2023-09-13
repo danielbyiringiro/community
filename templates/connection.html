@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Circle
+{% endblock %}
+
+{% block main %}
+    <div class="container exploreget">
+        <div>
+            <p><strong>{{username_name}}'s Circle</strong></p>
+        </div>
+        <hr>
+        {% for user in users %}
+            <div class="friend" id="{{user['id']}}">
+                <div class="friend_details">
+                    <div class="friend_picture">
+                        <img src="/{{user['path']}}" alt="profile picture" id="friend_pic">
+                    </div>
+                    <div class="friend_name">
+                        <p id="friend_name"><a href="/users/{{user['username']}}">{{user['username']}}</a></p>
+                        <p id="friend_class">{{user['class']}} {{user['major']}}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -189,29 +189,6 @@ function openPostEditor()
     window.location.href = url;
 }
 
-function initializeLikeStatus(post_id) {
-    const likeImage = document.getElementById(`vibe-image-${post_id}`);
-    
-    fetch(`/liked/${post_id}`, {method: 'POST'})
-        .then((res) => res.json())
-        .then((data) => {
-            if (data['liked'] === false) {
-                likeImage.src = "/static/vibed.jpeg";
-            } else {
-                likeImage.src = "/static/vibe.png";
-            }
-        });
-}
-
-function initializeAllLikeStatus() {
-    const imgElements = document.querySelectorAll('.vibe-button img[data-post-id]');
-    imgElements.forEach((imgElement) => {
-        const post_id = imgElement.getAttribute('data-post-id');
-        initializeLikeStatus(post_id);
-        most_recent(post_id);
-    });
-}
-
 var queryexecuted = false;
 
 function searchquery()
@@ -968,10 +945,7 @@ function savemajor()
     })
 }
 
-document.addEventListener('DOMContentLoaded',initializeAllLikeStatus);
 document.addEventListener('DOMContentLoaded',checkIfPostsExist);
-
-window.addEventListener('load', initializeAllLikeStatus);
 window.addEventListener('load', checkIfPostsExist);
 
 document.addEventListener('DOMContentLoaded', () => {
